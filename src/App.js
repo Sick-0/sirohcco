@@ -1,10 +1,10 @@
 import './App.css';
 import {Link, Route, Switch} from 'react-router-dom'
-import Home from "./Home";
-import Account from "./Account";
+import Home from "./components/Home";
+import Account from "./components/Account";
 
-import ProtectedRoute from "./ProtectedRoute";
-import GameDetail from "./GameDetail";
+import ProtectedRoute from "./components/ProtectedRoute";
+import GameDetail from "./components/GameDetail";
 
 
 function App() {

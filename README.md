@@ -3,7 +3,8 @@
 
 ## Available Scripts
 
-In the project directory FIRST run `npm install`, then you run:
+FIRST: dont forget to create a .env file with your API_KEY
+In the project directory run `npm install`, then you run:
 
 ### `npm start` AND `npm run server`
 
