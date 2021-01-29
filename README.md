@@ -3,7 +3,7 @@
 
 ## Available Scripts
 
-In the project directory, you run:
+In the project directory FIRST run `npm install`, then you run:
 
 ### `npm start` AND `npm run server`
 
