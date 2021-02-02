@@ -18,13 +18,10 @@ function Home() {
             );
             if (result.data) {
                 setData(result.data);
-                console.log(result.data);
-                console.log(data);
             }
         };
-
         fetchData();
-    }, []);
+    });
 
 
     return (

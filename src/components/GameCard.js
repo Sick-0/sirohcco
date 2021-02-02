@@ -7,7 +7,7 @@ function GameCard(props) {
 
             <img className="mx-auto pb-2 rounded-3xl"
                  src={"http://media.steampowered.com/steamcommunity/public/images/apps/" + props.appid + "/" + props.img_icon_url + ".jpg"}
-                 alt="Card image cap"/>
+                 alt={"Card image for " + props.name}/>
                 <h1 className="text-3xl p-1 mb-1">{props.name}</h1>
                 <p className="text-sm p-1 mb-1">{props.appid}</p>
         </div>

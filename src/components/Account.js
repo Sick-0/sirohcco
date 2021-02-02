@@ -1,12 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import {Link, Redirect} from "react-router-dom"
+import {Link} from "react-router-dom"
 import GameCard from "./GameCard";
 
 function Account() {
     const [data, setData] = useState([{}]);
     const [games, setGames] = useState([{}]);
 
+//TODO get this from session
     useEffect(() => {
         const fetchData = async () => {
             const result = await axios.get(
@@ -20,14 +21,13 @@ function Account() {
             );
             if (result.data) {
                 setData(result.data);
-                console.log(result.data);
 
             }
         };
 
         fetchData();
     }, []);
-
+//TODO ONLY load the game if it has achievements
     useEffect(() => {
         const fetchGame = async () => {
             const result = await axios.get(
@@ -41,34 +41,28 @@ function Account() {
             );
             if (result.data) {
                 setGames(result.data);
-                console.log(result.data);
-
             }
         };
 
         fetchGame();
     }, []);
 
-    function showDetails(id) {
-        console.log("DA ID");
-        console.log(id);
-        return <Redirect to={"/gamedetail"} />;
-    }
-
     //TODO DESIGN
     //TODO more account info?
-
+    //TODO Account COMPONENT
+    //TODO ALLGAMES COMPONENT
     return (
         <div>
             <h1>Account</h1>
-
             { data.user && <h1>user: {data.user.displayName}</h1>}
-            { data.user && <img src={data.user.photos[2].value}/>}
+            { data.user && <img alt={"profile pic for " + data.user.displayName} src={data.user.photos[2].value}/>}
+
 
             <div className="grid grid-cols-3 gap-2 place-content-evenly">
             {games && games.map((value, index) => {
                 return (
-                    <Link to={{
+                    value.has_community_visible_stats &&
+                    <Link key={index} to={{
                         pathname: '/detail',
                         state: {
                             id: value.appid,
@@ -85,7 +79,5 @@ function Account() {
 }
 
 export default Account;
-
-//
 
 

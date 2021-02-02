@@ -13,7 +13,7 @@ function GameDetail(props) {
     //TODO Add filters
     //TODO Grayed icons and other conditional renders
     //TODO Datetime parsing
-
+    //TODO errror handeling on missing info
     useEffect(() => {
         const fetchData = async () => {
             const result = await axios.get(
@@ -31,7 +31,7 @@ function GameDetail(props) {
         };
 
         fetchData();
-    }, []);
+    }, [props.location.state.id]);
 
     useEffect(() => {
         const fetchAchievement = async () => {
@@ -50,7 +50,7 @@ function GameDetail(props) {
         };
 
         fetchAchievement();
-    }, []);
+    }, [props.location.state.id]);
 
     useEffect(() => {
         const fetchPercentage = async () => {
@@ -69,7 +69,7 @@ function GameDetail(props) {
         };
 
         fetchPercentage();
-    }, []);
+    }, [props.location.state.id]);
 
     useEffect(() => {
         if (gameData.availableGameStats && achievementData.playerstats && percentageData.achievementpercentages) {
@@ -104,9 +104,7 @@ function GameDetail(props) {
                             checked={value.achieved}
                             date={value.unlocktime}
                             percent={value.percent}/>
-
                     </div>
-
                 )
             })}
             </div>

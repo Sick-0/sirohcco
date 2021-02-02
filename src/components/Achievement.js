@@ -7,7 +7,7 @@ function Achievement(props) {
 
             <img className="mx-auto pb-2 rounded-3xl"
                  src={props.image}
-                 alt="Card image cap"/>
+                 alt={"Card image for" + props.name}/>
             <h1 className="text-3xl p-1 mb-1">{props.name}</h1>
             <p>PERCENT = {props.percent}</p>
             <p className="text-sm p-1 mb-1">{props.description}</p>

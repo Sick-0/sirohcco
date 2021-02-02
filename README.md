@@ -3,7 +3,7 @@
 
 ## Available Scripts
 
-FIRST: dont forget to create a .env file with your API_KEY
+FIRST: dont forget to create a .env file with your API_KEY -> explain how to get key
 In the project directory run `npm install`, then you run:
 
 ### `npm start` AND `npm run server`
@@ -14,7 +14,7 @@ Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 Run server runs the express server with NODEMON on [http://localhost:8080](http://localhost:8080) 
 
 ## Learn More
-
+TODO FILL IN ACTUAL URLS AND FORMAT
 STEAM API URL
 EXPRESS URL
 REACT URL
