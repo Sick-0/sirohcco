@@ -5,6 +5,7 @@ import Account from "./components/Account";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import GameDetail from "./components/GameDetail";
+import AllAchievements from "./components/AllAchievements";
 
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
                 <ul>
                     <li><Link to="/">Home</Link></li>
                     <li><Link to="/account">Account</Link></li>
+                    <li><Link to="/all">All Achievements</Link></li>
                     <li><a href="http://localhost:8080/auth/steam">Login</a></li>
                 </ul>
             </header>
@@ -26,6 +28,7 @@ function App() {
                     <Route path="/" exact component={Home}/>
                     <ProtectedRoute path="/account" component={Account}/>
                     <ProtectedRoute path="/detail" component={GameDetail}/>
+                    <ProtectedRoute path="/all" component={AllAchievements}/>
                 </Switch>
             </div>
 

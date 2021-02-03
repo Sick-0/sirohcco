@@ -26,6 +26,7 @@ function GameDetail(props) {
                 }
             );
             if (result.data) {
+                console.log(result);
                 setGameData(result.data.game);
             }
         };

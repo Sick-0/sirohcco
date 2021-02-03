@@ -15,11 +15,11 @@ require('dotenv').config()
 //   the user by ID when deserializing.  However, since this example does not
 //   have a database of user records, the complete Steam profile is serialized
 //   and deserialized.
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function (user, done) {
     done(null, user);
 });
 
-passport.deserializeUser(function(obj, done) {
+passport.deserializeUser(function (obj, done) {
     done(null, obj);
 });
 
@@ -32,9 +32,9 @@ passport.use(new SteamStrategy({
         realm: 'http://localhost:8080/',
         apiKey: process.env.API_KEY
     },
-    function(identifier, profile, done) {
+    function (identifier, profile, done) {
         // asynchronous verification, for effect...
-        process.nextTick(function () {
+        process.nextTick(() => {
 
             // To keep the example simple, the user's Steam profile is returned to
             // represent the logged-in user.  In a typical application, you would want
@@ -46,6 +46,8 @@ passport.use(new SteamStrategy({
     }
 ));
 
+
+
 var server = express();
 
 server.use(cors())
@@ -53,7 +55,8 @@ server.use(session({
     secret: 'terces-sirohcco',
     name: 'sirohcco-session',
     resave: true,
-    saveUninitialized: true}));
+    saveUninitialized: true
+}));
 
 // Initialize Passport!  Also use passport.session() middleware, to support
 // persistent login sessions (recommended).
@@ -61,43 +64,30 @@ server.use(passport.initialize());
 server.use(passport.session());
 
 //home route
-server.get('/', function(req, res){
-    console.log("index ROUTE HIT");
-    console.log("user is ");
-    console.log(req.user);
+server.get('/', function (req, res) {
     res.redirect("http://localhost:3000/");
 });
 
 //api home test
-server.get('/api/home', function(req, res){
-    console.log("HOME ROUTE HIT");
-    console.log("user is ");
-    if (req.user)
-    {
+server.get('/api/home', function (req, res) {
+
+    if (req.user) {
         res.send('Hallo ' + req.user.displayName);
-    }
-    else{
-        res.send(' hello plz login :(' );
+    } else {
+        res.send(' hello plz login :(');
     }
 });
 
 //get account details
-server.get('/api/account', ensureAuthenticated,  function(req, res){
-    console.log("account route hit");
-    console.log("user is ");
-    console.log(req.user);
+server.get('/api/account', ensureAuthenticated, function (req, res) {
     res.send({user: req.user});
 });
 
 //check if allowed
-server.get('/api/check', function(req, res){
-    console.log("CHECK route hit");
-    console.log("user is ");
-    console.log(req.user);
+server.get('/api/check', function (req, res) {
     if (req.user) {
         res.send({user: req.user});
-    }
-    else {
+    } else {
         res.status(400).send({
             message: 'NOT ALLOWED YA FUDGER'
         });
@@ -106,45 +96,44 @@ server.get('/api/check', function(req, res){
 });
 
 //get all games
-server.get('/api/allgames', ensureAuthenticated, async function (req, res){
+server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
     console.log('allgames ROUTE hit');
     let allG = await allGames(req.user.id);
-    console.log(allG.data.response.games);
     res.send(allG.data.response.games);
 })
 
-//get game detail
-server.get('/api/game/', ensureAuthenticated, async function (req, res){
+server.get('/api/allachievements', ensureAuthenticated, async function (req, res) {
+    console.log('all achievements ROUTE hit');
+    let allA = await getTheAllTogheterNow(req.user.id);
+    console.log(allA);
+    res.send(allA);
+})
 
-    console.log('DETAILLLL HIT');
-    console.log(req.query.appid);
-    let detailG = await  gameDetail(req.query.appid)
-    console.log(detailG.data);
+//get game detail
+server.get('/api/game/', ensureAuthenticated, async function (req, res) {
+
+    let detailG = await gameDetail(req.query.appid)
+    console.log(detailG.data.availableGameStats);
     res.send(detailG.data);
 })
 
 //get achievement detail
-server.get('/api/achievement/', ensureAuthenticated, async function (req, res){
+server.get('/api/achievement/', ensureAuthenticated, async function (req, res) {
 
-    console.log('achievement HIT');
-    console.log(req.query.appid);
-    let achievementG = await  getAchievements(req.user.id, req.query.appid)
+    let achievementG = await getAchievements(req.user.id, req.query.appid)
     console.log(achievementG.data);
     res.send(achievementG.data);
 })
 
 //get percentage detail
-server.get('/api/percentage/', ensureAuthenticated, async function (req, res){
-
-    console.log('percentage HIT');
-    console.log(req.query.appid);
-    let percentageG = await  getGlobalStats(req.query.appid)
+server.get('/api/percentage/', ensureAuthenticated, async function (req, res) {
+    let percentageG = await getGlobalStats(req.query.appid)
     console.log(percentageG.data);
     res.send(percentageG.data);
 })
 
 //logout route
-server.get('/logout', function(req, res){
+server.get('/logout', function (req, res) {
     req.logout();
     res.redirect('http://localhost:3000/');
 });
@@ -155,10 +144,8 @@ server.get('/logout', function(req, res){
 //   the user to steamcommunity.com.  After authenticating, Steam will redirect the
 //   user back to this application at /auth/steam/return
 server.get('/auth/steam',
-    passport.authenticate('steam', { failureRedirect: '/' }),
-    function(req, res) {
-        console.log("user is pre steam");
-        console.log(req.user);
+    passport.authenticate('steam', {failureRedirect: '/'}),
+    function (req, res) {
         res.redirect('/account');
     });
 
@@ -168,10 +155,8 @@ server.get('/auth/steam',
 //   login page.  Otherwise, the primary route function function will be called,
 //   which, in this example, will redirect the user to the home page.
 server.get('/auth/steam/return',
-    passport.authenticate('steam', { failureRedirect: '/' }),
-    function(req, res) {
-        console.log("user is after steam");
-        console.log(req.user);
+    passport.authenticate('steam', {failureRedirect: '/'}),
+    function (req, res) {
         res.redirect("http://localhost:3000/account");
     });
 
@@ -183,9 +168,9 @@ server.listen(8080);
 //   the request will proceed.  Otherwise, the user will be redirected to the
 //   login page.
 function ensureAuthenticated(req, res, next) {
-    console.log("user is ");
-    console.log(req.user);
-    if (req.isAuthenticated()) { return next(); }
+    if (req.isAuthenticated()) {
+        return next();
+    }
     res.redirect('/');
 }
 
@@ -219,7 +204,6 @@ async function gameDetail(appid) {
             }
         );
     } catch (error) {
-        console.log("DETAIL FAIL");
         console.error(error)
     }
 }
@@ -237,7 +221,6 @@ async function getAchievements(id, appid) {
             }
         );
     } catch (error) {
-        console.log("achievment FAIL");
         console.error(error)
     }
 }
@@ -254,12 +237,101 @@ async function getGlobalStats(appid) {
             }
         );
     } catch (error) {
-        console.log("percentage FAIL");
         console.error(error)
     }
 }
 
+//TODO improve and refactor
+async function getTheAllTogheterNow(userId) {
 
+    const allUser = await allGames(userId)
+
+    let array = allUser.data.response.games;
+
+    let filtered = Object.values(array).filter(array => array.has_community_visible_stats);
+
+    const allAchievi = await getAllAchievements(filtered, userId);
+
+    const globalAchievi = await getGlobalAchievements(filtered);
+
+    let allClean = allAchievi.map(achi => {
+        return achi.playerstats;
+    })
+
+    const arrs = [...filtered, ...globalAchievi];
+    const noDuplicate = arr => [...new Set(arr)]
+    const allIds = arrs.map(ele => ele.appid);
+    const ids = noDuplicate(allIds);
+
+    const result = ids.map(id =>
+        arrs.reduce((self, item) => {
+            return item.appid === id ?
+                {...self, ...item} : self
+        }, {})
+    )
+
+    const arrs2 = [...result, ...allClean];
+    const noDuplicate2 = arr2 => [...new Set(arr2)]
+    const allIds2 = arrs2.map(ele => ele.name);
+    const ids2 = noDuplicate2(allIds2);
+
+    const result2 = ids2.map(id =>
+        arrs2.reduce((self, item) => {
+            return item.name === id || item.gameName === id ?
+                {...self, ...item} : self
+        }, {})
+    )
+
+    result2.forEach(object => {
+        object.achievements.forEach(function(achi, index) {
+            object.achievements[index] = Object.assign(achi, object.data.achievements[index]);
+        })
+    })
+
+    result2.forEach(object => {
+        delete object.data;
+    })
+
+    return result2;
+}
+
+async function getAllAchievements(arr, userId) {
+
+    let achievementsToReturn = []
+    let requests = arr.map(id => {
+        //create a promise for each API call
+        return getAchievements(userId, id.appid)
+    });
+
+    return await Promise.all(requests).then((body) => {
+        //this gets called when all the promises have resolved/rejected.
+        body.forEach(res => {
+            if (res)
+                achievementsToReturn.push(res.data)
+        })
+        return achievementsToReturn;
+    }).catch(err => console.log(err))
+}
+
+async function getGlobalAchievements(arr) {
+
+    let achievementsToReturn = []
+    let requests = arr.map(id => {
+        //create a promise for each API call
+        return getGlobalStats(id.appid)
+    });
+
+    return await Promise.all(requests).then((body) => {
+        //this gets called when all the promises have resolved/rejected.
+        body.forEach(res => {
+            if (res)
+            {
+                achievementsToReturn.push({appid: res.config.params.gameid, data: res.data.achievementpercentages});
+            }
+        })
+        return achievementsToReturn;
+    }).catch(err => console.log(err))
+}
 
 //https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=1091500
 
