@@ -7,6 +7,7 @@ function AllAchievements() {
     const [data, setData] = useState([{}]);
     const [achievements, setAchievements] = useState([]);
 
+
 //TODO get this from session
     useEffect(() => {
         const fetchData = async () => {
@@ -31,8 +32,21 @@ function AllAchievements() {
 
     useEffect(() => {
         const orgAchievements = async () => {
+            let tempArr = [];
 
-            //organise achievements
+            data.forEach(object => {
+                if (object.achievements) {
+                    object.achievements.forEach(function (achi, index) {
+                        let tempObj = achi;
+                        tempObj.gameName = object.name;
+                        tempObj.appid = object.appid;
+                        tempArr.push(tempObj);
+                    })
+                }
+            })
+            setAchievements(tempArr);
+            console.log(tempArr);
+
         };
 
         orgAchievements();

@@ -251,8 +251,13 @@ async function getTheAllTogheterNow(userId) {
     let filtered = Object.values(array).filter(array => array.has_community_visible_stats);
 
     const allAchievi = await getAllAchievements(filtered, userId);
+    console.log(allAchievi);
 
     const globalAchievi = await getGlobalAchievements(filtered);
+
+    //TODO extra call and join
+
+    //need to call gamedetail as wel for the images of the achievements (gamedetail(appid);)
 
     let allClean = allAchievi.map(achi => {
         return achi.playerstats;
@@ -282,9 +287,10 @@ async function getTheAllTogheterNow(userId) {
         }, {})
     )
 
+
     result2.forEach(object => {
         object.achievements.forEach(function(achi, index) {
-            object.achievements[index] = Object.assign(achi, object.data.achievements[index]);
+            object.achievements[index] = Object.assign(achi, search(achi.apiname, object.data.achievements));
         })
     })
 
@@ -293,6 +299,14 @@ async function getTheAllTogheterNow(userId) {
     })
 
     return result2;
+}
+
+function search(nameKey, myArray){
+    for (var i=0; i < myArray.length; i++) {
+        if (myArray[i].name === nameKey) {
+            return myArray[i];
+        }
+    }
 }
 
 async function getAllAchievements(arr, userId) {
@@ -306,9 +320,11 @@ async function getAllAchievements(arr, userId) {
     return await Promise.all(requests).then((body) => {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
+            console.log(res);
             if (res)
                 achievementsToReturn.push(res.data)
         })
+        console.log(achievementsToReturn);
         return achievementsToReturn;
     }).catch(err => console.log(err))
 }
