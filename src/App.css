@@ -56,3 +56,11 @@
     transform: rotate(360deg);
   }
 }
+
+.CardFront{
+  width:400px;
+}
+
+.CardBack{
+  width:400px;
+}

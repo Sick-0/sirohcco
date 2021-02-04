@@ -1,8 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import axios from "axios";
-import {Link} from "react-router-dom"
-import GameCard from "./GameCard";
-import Achievement from "./Achievement";
 import FlipBadge from "./FlipBadge";
 import SearchBar from "./SearchBar";
 import ReactPaginate from 'react-paginate';
@@ -30,7 +27,6 @@ function AllAchievements() {
             );
             if (result.data) {
                 setData(result.data);
-                console.log(result.data);
 
             }
         };
@@ -54,9 +50,8 @@ function AllAchievements() {
             })
             setAchievements(tempArr);
             setFilteredAchievements(tempArr);
-            let pages = tempArr.length/100;
+            let pages = tempArr.length / 100;
             setPageCount(pages);
-            console.log(tempArr);
             handlePageClick({selected: 0});
 
         };
@@ -69,35 +64,36 @@ function AllAchievements() {
             return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
         })
         setFilteredAchievements(filtered);
-        let pages = filtered.length/100;
+        let pages = filtered.length / 100;
         setPageCount(pages);
-        console.log(filtered);
+        console.log(pagedData);
         handlePageClick({selected: 0});
     }
 
-   const handlePageClick = (data) => {
+    const handlePageClick = (data) => {
         let selected = data.selected;
-        setOffset(Math.ceil(selected * 99));
-        setPagedData(filteredAchievements.slice(offset ,offset+99));
-        console.log("click happend! on" + data.selected);
-
+        let off = Math.ceil(selected * offset);
+        setPagedData(filteredAchievements.slice(off, off + offset));
     };
 
     return (
         <div>
             <h1>All Achievements</h1>
             <SearchBar handleOnChange={handleOnChange}>...</SearchBar>
+            <div className="grid grid-cols-3 gap-4">
+                {
+                    pagedData && pagedData.map((value, index) => {
+                        return (
+                            <div key={index}>
+                                <FlipBadge name={value.displayName} description={value.description}
+                                           date={value.unlocktime} percent={value.percent} achieved={value.achieved}
+                                           icon={value.achieved ? value.icon : value.icongray}/>
+                            </div>
+                        )
 
-            {
-                pagedData && pagedData.map((value, index) => {
-                    return(
-                        <div key={index}>
-                            <FlipBadge name={value.displayName} description={value.description} date={value.unlocktime} percent={value.percent} achieved={value.achieved} icon={value.achieved ? value.icon : value.icongray} />
-                        </div>
-                    )
-
-                })
-            }
+                    })
+                }
+            </div>
             <ReactPaginate
                 previousLabel={'previous'}
                 nextLabel={'next'}
