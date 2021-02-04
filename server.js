@@ -103,7 +103,7 @@ server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
 
 server.get('/api/allachievements', ensureAuthenticated, async function (req, res) {
     console.log('all achievements ROUTE hit');
-    let allA = await getTheAllTogheterNow(req.user.id);
+    let allA = await getAllAchiements(req.user.id);
     res.send(allA);
 })
 
@@ -236,31 +236,30 @@ async function getGlobalStats(appid) {
     }
 }
 
-//TODO improve and refactor
+//TODO improve and refactor Thanks to Xander
 //Thanks to Xander
-async function getTheAllTogheterNow(userId) {
+async function getAllAchiements(userId) {
 
-    const allUser = await allGames(userId)
+    const allUserGamesData = await allGames(userId)
 
-    let array = allUser.data.response.games;
-    let filtered = Object.values(array).filter(array => array.has_community_visible_stats);
+    let allUserGames = allUserGamesData.data.response.games;
+    let GamesWithAchievements = Object.values(allUserGames).filter(array => array.has_community_visible_stats);
 
-    const allAchievi = await getAllAchievements(filtered, userId);
-    const globalAchievi = await getGlobalAchievements(filtered);
-    const allGameData = await getAllGameData(filtered);
+    const userAchievements = await getAllUserAchievements(GamesWithAchievements, userId);
+    const globalAchievements = await getGlobalAchievements(GamesWithAchievements);
+    const allGameData = await getAllGameData(GamesWithAchievements);
 
-    let allClean = allAchievi.map(achi => {
+    let allGamesClean = userAchievements.map(achi => {
         achi.playerstats.name = achi.playerstats.gameName;
         delete achi.playerstats.gameName;
         return achi.playerstats;
     })
 
-    const result = joinArr("appid", filtered, globalAchievi, allGameData);
-    const result2 = joinArr("name", result, allClean);
+    const allGamesAndAchievements = joinArr("appid", GamesWithAchievements, globalAchievements, allGameData, allGamesClean);
 
-    if (result2) {
-        result2.forEach(object => {
-            if (object.achievements) {
+    if (allGamesAndAchievements) {
+        allGamesAndAchievements.forEach(object => {
+            if (object.achievements && object.achievementData.achievements && object.gameData.game.availableGameStats.achievements) {
                 object.achievements.forEach(function (achi, index) {
                     object.achievements[index] = Object.assign(achi, search(achi.apiname, object.achievementData.achievements));
                     object.achievements[index] = Object.assign(achi, search(achi.apiname, object.gameData.game.availableGameStats.achievements));
@@ -269,12 +268,12 @@ async function getTheAllTogheterNow(userId) {
         })
     }
 
-    result2.forEach(object => {
+    allGamesAndAchievements.forEach(object => {
         delete object.achievementData;
         delete object.gameData;
     })
 
-    return result2;
+    return allGamesAndAchievements;
 }
 
 function search(nameKey, myArray) {
@@ -300,12 +299,16 @@ function joinArr(key, ...ar) {
     )
 }
 
-async function getAllAchievements(arr, userId) {
+async function getAllUserAchievements(arr, userId) {
 
     let achievementsToReturn = []
     let requests = arr.map(id => {
         //create a promise for each API call
         return getAchievements(userId, id.appid)
+    });
+    let appID = arr.map(id => {
+        //create a promise for each API call
+        return id.appid;
     });
 
     return await Promise.all(requests).then((body) => {
@@ -314,9 +317,14 @@ async function getAllAchievements(arr, userId) {
             if (res)
                 achievementsToReturn.push(res.data)
         })
+        for (let i = 0; i < achievementsToReturn.length; i++) {
+            achievementsToReturn[i].playerstats.appid = appID[i];
+        }
         return achievementsToReturn;
     }).catch(err => console.log(err))
 }
+
+
 
 async function getAllGameData(arr) {
     let gamesToReturn = []
