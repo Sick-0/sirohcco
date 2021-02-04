@@ -2,6 +2,8 @@ import React, {useEffect, useState} from 'react';
 import axios from "axios";
 import {Link} from "react-router-dom"
 import GameCard from "./GameCard";
+import Achievement from "./Achievement";
+import FlipBadge from "./FlipBadge";
 
 function AllAchievements() {
     const [data, setData] = useState([{}]);
@@ -57,10 +59,15 @@ function AllAchievements() {
             <h1>All Achievements</h1>
 
             {
-                achievements && <p>achievements</p>
+                achievements && achievements.map((value, index) => {
+                    return(
+                        <div key={index}>
+                            <FlipBadge name={value.displayName} description={value.description} date={value.unlocktime} percent={value.percent} achieved={value.achieved} icon={value.achieved ? value.icon : value.icongray} />
+                        </div>
+                    )
+
+                })
             }
-
-
             <div className="grid grid-cols-3 gap-2 place-content-evenly">
                <p>HERE COMES DA BOOM</p>
             </div>

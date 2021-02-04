@@ -47,7 +47,6 @@ passport.use(new SteamStrategy({
 ));
 
 
-
 var server = express();
 
 server.use(cors())
@@ -105,7 +104,6 @@ server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
 server.get('/api/allachievements', ensureAuthenticated, async function (req, res) {
     console.log('all achievements ROUTE hit');
     let allA = await getTheAllTogheterNow(req.user.id);
-    console.log(allA);
     res.send(allA);
 })
 
@@ -113,7 +111,6 @@ server.get('/api/allachievements', ensureAuthenticated, async function (req, res
 server.get('/api/game/', ensureAuthenticated, async function (req, res) {
 
     let detailG = await gameDetail(req.query.appid)
-    console.log(detailG.data.availableGameStats);
     res.send(detailG.data);
 })
 
@@ -121,14 +118,12 @@ server.get('/api/game/', ensureAuthenticated, async function (req, res) {
 server.get('/api/achievement/', ensureAuthenticated, async function (req, res) {
 
     let achievementG = await getAchievements(req.user.id, req.query.appid)
-    console.log(achievementG.data);
     res.send(achievementG.data);
 })
 
 //get percentage detail
 server.get('/api/percentage/', ensureAuthenticated, async function (req, res) {
     let percentageG = await getGlobalStats(req.query.appid)
-    console.log(percentageG.data);
     res.send(percentageG.data);
 })
 
@@ -247,66 +242,61 @@ async function getTheAllTogheterNow(userId) {
     const allUser = await allGames(userId)
 
     let array = allUser.data.response.games;
-
     let filtered = Object.values(array).filter(array => array.has_community_visible_stats);
 
     const allAchievi = await getAllAchievements(filtered, userId);
-    console.log(allAchievi);
-
     const globalAchievi = await getGlobalAchievements(filtered);
-
-    //TODO extra call and join
-
-    //need to call gamedetail as wel for the images of the achievements (gamedetail(appid);)
+    const allGameData = await getAllGameData(filtered);
 
     let allClean = allAchievi.map(achi => {
+        achi.playerstats.name = achi.playerstats.gameName;
+        delete achi.playerstats.gameName;
         return achi.playerstats;
     })
 
-    const arrs = [...filtered, ...globalAchievi];
-    const noDuplicate = arr => [...new Set(arr)]
-    const allIds = arrs.map(ele => ele.appid);
-    const ids = noDuplicate(allIds);
+    const result = joinArr("appid", filtered, globalAchievi, allGameData);
+    const result2 = joinArr("name", result, allClean);
 
-    const result = ids.map(id =>
-        arrs.reduce((self, item) => {
-            return item.appid === id ?
-                {...self, ...item} : self
-        }, {})
-    )
-
-    const arrs2 = [...result, ...allClean];
-    const noDuplicate2 = arr2 => [...new Set(arr2)]
-    const allIds2 = arrs2.map(ele => ele.name);
-    const ids2 = noDuplicate2(allIds2);
-
-    const result2 = ids2.map(id =>
-        arrs2.reduce((self, item) => {
-            return item.name === id || item.gameName === id ?
-                {...self, ...item} : self
-        }, {})
-    )
-
-
-    result2.forEach(object => {
-        object.achievements.forEach(function(achi, index) {
-            object.achievements[index] = Object.assign(achi, search(achi.apiname, object.data.achievements));
+    if (result2) {
+        result2.forEach(object => {
+            if (object.achievements) {
+                object.achievements.forEach(function (achi, index) {
+                    object.achievements[index] = Object.assign(achi, search(achi.apiname, object.achievementData.achievements));
+                    object.achievements[index] = Object.assign(achi, search(achi.apiname, object.gameData.game.availableGameStats.achievements));
+                })
+            }
         })
-    })
+    }
 
     result2.forEach(object => {
-        delete object.data;
+        delete object.achievementData;
+        delete object.gameData;
     })
 
     return result2;
 }
 
-function search(nameKey, myArray){
-    for (var i=0; i < myArray.length; i++) {
+function search(nameKey, myArray) {
+    for (var i = 0; i < myArray.length; i++) {
         if (myArray[i].name === nameKey) {
             return myArray[i];
         }
     }
+}
+
+function joinArr(key, ...ar) {
+    let arrs = [];
+    ar.forEach(a => arrs = [...arrs, ...a]);
+    const noDuplicate = arr => [...new Set(arr)]
+    const allIds = arrs.map(ele => ele[key]);
+    const ids = noDuplicate(allIds);
+
+    return ids.map(id =>
+        arrs.reduce((self, item) => {
+            return item[key] === id ?
+                {...self, ...item} : self
+        }, {})
+    )
 }
 
 async function getAllAchievements(arr, userId) {
@@ -320,12 +310,28 @@ async function getAllAchievements(arr, userId) {
     return await Promise.all(requests).then((body) => {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
-            console.log(res);
             if (res)
                 achievementsToReturn.push(res.data)
         })
-        console.log(achievementsToReturn);
         return achievementsToReturn;
+    }).catch(err => console.log(err))
+}
+
+async function getAllGameData(arr) {
+    let gamesToReturn = []
+    let requests = arr.map(id => {
+        //create a promise for each API call
+        return gameDetail(id.appid)
+    });
+
+    return await Promise.all(requests).then((body) => {
+        //this gets called when all the promises have resolved/rejected.
+        body.forEach(res => {
+            if (res) {
+                gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
+            }
+        })
+        return gamesToReturn;
     }).catch(err => console.log(err))
 }
 
@@ -340,9 +346,8 @@ async function getGlobalAchievements(arr) {
     return await Promise.all(requests).then((body) => {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
-            if (res)
-            {
-                achievementsToReturn.push({appid: res.config.params.gameid, data: res.data.achievementpercentages});
+            if (res) {
+                achievementsToReturn.push({appid: res.config.params.gameid, achievementData: res.data.achievementpercentages});
             }
         })
         return achievementsToReturn;
