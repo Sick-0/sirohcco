@@ -3,7 +3,7 @@ import {useState} from "react";
 function FlipBadge(props) {
 
     const [isHover, setIsHover] = useState(false);
-
+    //thanks to kayalin
     return (
         <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} className={""}>
 

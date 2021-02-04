@@ -237,6 +237,7 @@ async function getGlobalStats(appid) {
 }
 
 //TODO improve and refactor
+//Thanks to Xander
 async function getTheAllTogheterNow(userId) {
 
     const allUser = await allGames(userId)

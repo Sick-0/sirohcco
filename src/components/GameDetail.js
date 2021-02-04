@@ -9,7 +9,6 @@ function GameDetail(props) {
     const [percentageData, setPercentageData] = useState([]);
     const [allData, setAllData] = useState([]);
 
-    //TODO Move partly to the backend (calls and joins 2 calls here array achievements + general gamedata?)
     //TODO Add filters
     //TODO Grayed icons and other conditional renders
     //TODO Datetime parsing
