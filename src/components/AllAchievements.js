@@ -5,37 +5,70 @@ import SearchBar from "./SearchBar";
 import ReactPaginate from 'react-paginate';
 
 function AllAchievements() {
+    //TODO replace with REDUX or context
     const [data, setData] = useState([{}]);
     const [achievements, setAchievements] = useState([]);
     const [filteredAchievements, setFilteredAchievements] = useState([]);
     const [pageCount, setPageCount] = useState(10);
     const [offset, setOffset] = useState(99);
     const [pagedData, setPagedData] = useState([]);
+    //TODO states for filters +
+    const [rarityDirection, setRarityDirection] = useState("asc");
+    const [isAchievedFilter, setIsAchievedFilter] = useState(1);
 
     const handleOnChange = e => {
         let filtered;
         if (e.target.value !== "") {
-            console.log("FILTER = " + e.target.value);
             filtered = achievements.filter(achi => {
                 return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
             })
         } else {
             filtered = achievements
-            console.log("EMPTY FILTER")
         }
         setFilteredAchievements(filtered);
         let pages = filtered.length / offset;
         setPageCount(pages);
         handlePageClick({selected: 0});
-        console.log("DID I HANDLE SOME CHANGE");
+
+    }
+    //TODO add flip for rarity + add achieved + date AND THE COMBO OF FILTERS
+    const sortRarity = e => {
+        if (rarityDirection === "asc"){
+            let tempArr = filteredAchievements.sort(function(a, b) {
+                return a.percent - b.percent})
+            setFilteredAchievements(tempArr);
+            setRarityDirection("desc");
+        }
+        else{
+            let tempArr = filteredAchievements.sort(function(a, b) {
+                return b.percent - a.percent})
+            setFilteredAchievements(tempArr);
+            setRarityDirection("asc");
+        }
+        console.log(e);
 
     }
 
+    //TODO NO FUNCTION PER FILTER -> ONE FILTER FUNCTION CHECKING ALL STATES
+    const achievedFilter = e => {
+        console.log(achievements);
+        let tempArr = achievements.filter(function(a) {
+            return a.achieved === isAchievedFilter })
+        console.log(tempArr);
+        setFilteredAchievements(tempArr);
+    }
+
     const handlePageClick = (data) => {
-        let selected = data.selected;
-        console.log("PAGE CHANGE TO " + selected);
-        let off = Math.ceil(selected * offset);
-        setPagedData(filteredAchievements.slice(off, off + offset));
+        if (filteredAchievements.length !== 0) {
+            let selected = data.selected;
+            let off = Math.ceil(selected * offset);
+            setPagedData(filteredAchievements.slice(off, off + offset));
+
+        }
+        else
+        {
+            console.log("Gonna have toclick again");
+        }
     };
 
     useEffect(() => {
@@ -51,8 +84,6 @@ function AllAchievements() {
             );
             if (result.data) {
                 setData(result.data);
-                console.log(result.data);
-                console.log("I GOT THE DATA");
             }
         };
 
@@ -60,7 +91,7 @@ function AllAchievements() {
     }, []);
 
     useEffect(() => {
-        if (data.length !== 0) {
+        if (data.length !== {}) {
             const orgAchievements = async () => {
                 let tempArr = [];
 
@@ -76,22 +107,27 @@ function AllAchievements() {
                 })
                 setAchievements(tempArr);
                 setFilteredAchievements(tempArr);
-                let pages = tempArr.length / offset;
-                setPageCount(pages);
-                console.log("I FILTERED THE DATA");
-                handlePageClick({selected: 0});
-
-
             };
 
             orgAchievements();
+        } else {
+            console.log("EMPTY OBJECT")
         }
+
     }, [data]);
+
+    useEffect( () => {
+        let pages = filteredAchievements.length / offset;
+        setPageCount(pages);
+        handlePageClick({selected: 0});
+    }, [filteredAchievements, rarityDirection])
 
     return (
         <div>
             <h1>All Achievements</h1>
             <SearchBar handleOnChange={handleOnChange}>...</SearchBar>
+            <p onClick={sortRarity}>Sort rarity {rarityDirection}</p>
+            <p onClick={achievedFilter}>Set achieved is {isAchievedFilter}</p>
             <div className="grid grid-cols-3 gap-4">
                 {
                     pagedData ? pagedData.map((value, index) => {
@@ -143,7 +179,6 @@ function AllAchievements() {
                 containerClassName={'pagination'}
                 subContainerClassName={'pages pagination'}
                 activeClassName={'active'}
-                initialPage={0}
             />
         </div>
     );

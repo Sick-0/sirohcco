@@ -15,7 +15,7 @@ function FlipBadge(props) {
 
 
             {!isHover && <div className={front}>
-                <img className="mx-auto"
+                <img className="mx-auto IconFront"
                      src={props.icon}
                      alt="Trophy icon but big"/>
                 <p className="text-center pb-2">{props.name}</p>
@@ -25,7 +25,7 @@ function FlipBadge(props) {
 
             <div className={back}>
                 <div className="flex items-center">
-                    <img className=" ml-6 w-1/4 h-1/4 mr-6"
+                    <img className="ml-6 w-1/4 h-1/4 mr-6"
                          src={props.icon}
                          alt="Trophy icon but small"/>
                     <p>{props.name}</p>
