@@ -150,10 +150,14 @@ function AllAchievements() {
                         } else if (value.percent < 70 && value.percent >= 40) {
                             border = "green-600"
                         } else if (value.percent < 40 && value.percent >= 10) {
+                            border = "blue-500"
+                        } else if (value.percent < 10 && value.percent >= 1) {
                             border = "purple-500"
                         } else {
                             border = "yellow-500"
                         }
+
+
                         return (
                             <div key={index}>
                                 <FlipBadge name={value.displayName}

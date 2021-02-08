@@ -356,7 +356,9 @@ async function getGlobalAchievements(arr) {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
             if (res) {
+                if (Object.keys(res.data).length !== 0){
                 achievementsToReturn.push({appid: res.config.params.gameid, achievementData: res.data.achievementpercentages});
+                }
             }
         })
         return achievementsToReturn;
