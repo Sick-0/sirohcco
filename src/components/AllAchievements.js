@@ -33,15 +33,16 @@ function AllAchievements() {
     }
     //TODO add flip for rarity + add achieved + date AND THE COMBO OF FILTERS
     const sortRarity = e => {
-        if (rarityDirection === "asc"){
-            let tempArr = filteredAchievements.sort(function(a, b) {
-                return a.percent - b.percent})
+        if (rarityDirection === "asc") {
+            let tempArr = filteredAchievements.sort(function (a, b) {
+                return a.percent - b.percent
+            })
             setFilteredAchievements(tempArr);
             setRarityDirection("desc");
-        }
-        else{
-            let tempArr = filteredAchievements.sort(function(a, b) {
-                return b.percent - a.percent})
+        } else {
+            let tempArr = filteredAchievements.sort(function (a, b) {
+                return b.percent - a.percent
+            })
             setFilteredAchievements(tempArr);
             setRarityDirection("asc");
         }
@@ -52,8 +53,9 @@ function AllAchievements() {
     //TODO NO FUNCTION PER FILTER -> ONE FILTER FUNCTION CHECKING ALL STATES
     const achievedFilter = e => {
         console.log(achievements);
-        let tempArr = achievements.filter(function(a) {
-            return a.achieved === isAchievedFilter })
+        let tempArr = achievements.filter(function (a) {
+            return a.achieved === isAchievedFilter
+        })
         console.log(tempArr);
         setFilteredAchievements(tempArr);
     }
@@ -64,9 +66,7 @@ function AllAchievements() {
             let off = Math.ceil(selected * offset);
             setPagedData(filteredAchievements.slice(off, off + offset));
 
-        }
-        else
-        {
+        } else {
             console.log("Gonna have toclick again");
         }
     };
@@ -99,6 +99,7 @@ function AllAchievements() {
                     if (object.achievements) {
                         object.achievements.forEach(function (achi, index) {
                             let tempObj = achi;
+                            tempObj.img_icon_url = "http://media.steampowered.com/steamcommunity/public/images/apps/" + object.appid + "/" + object.img_icon_url + ".jpg";
                             tempObj.gameName = object.name;
                             tempObj.appid = object.appid;
                             tempArr.push(tempObj);
@@ -116,7 +117,7 @@ function AllAchievements() {
 
     }, [data]);
 
-    useEffect( () => {
+    useEffect(() => {
         let pages = filteredAchievements.length / offset;
         setPageCount(pages);
         handlePageClick({selected: 0});
@@ -155,10 +156,17 @@ function AllAchievements() {
                         }
                         return (
                             <div key={index}>
-                                <FlipBadge name={value.displayName} description={value.description}
-                                           date={value.unlocktime} percent={value.percent} achieved={value.achieved}
+                                <FlipBadge name={value.displayName}
+                                           description={value.description}
+                                           date={value.unlocktime}
+                                           percent={value.percent}
+                                           achieved={value.achieved}
                                            icon={value.achieved ? value.icon : value.icongray} border={border}
-                                           colorBackGround={colorBackGround} textColor={textColor}/>
+                                           colorBackGround={colorBackGround}
+                                           textColor={textColor}
+                                           img_icon_url={value.img_icon_url}
+                                           detailId={value.appid}
+                                           parent_app={value.gameName}/>
                             </div>
 
 

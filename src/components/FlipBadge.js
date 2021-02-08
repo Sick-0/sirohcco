@@ -1,12 +1,14 @@
-import {useState} from "react";
+import React, {useState} from "react";
 import '../App.css';
+import {Link} from "react-router-dom";
+
 function FlipBadge(props) {
 
     const [isHover, setIsHover] = useState(false);
 
 
-    let front="CardFront bg-"+props.colorBackGround+ " text-"+props.textColor+ " border-solid border-8 border-"+props.border +" p-2 m-2 rounded-2xl"
-    let back="CardBack bg-"+props.colorBackGround+  " text-"+props.textColor+" border-solid border-8 border-"+props.border + " p-2 m-2 rounded-2xl"
+    let front = "CardFront bg-" + props.colorBackGround + " text-" + props.textColor + " border-solid border-8 border-" + props.border + " p-2 m-2 rounded-2xl"
+    let back = "CardBack bg-" + props.colorBackGround + " text-" + props.textColor + " border-solid border-8 border-" + props.border + " p-2 m-2 rounded-2xl"
     //thanks to kayalin
 
 
@@ -35,9 +37,16 @@ function FlipBadge(props) {
                     <br/>
                     <p>{props.date}</p>
                     <p>{props.description}</p>
-                    <img className=" mx-auto w-1/4 h-1/4"
-                         src="https://findicons.com/files/icons/770/token_dark/256/games.png"
-                         alt="Trophy icon but small"/>
+                    <Link className="w-1/8 h-1/8" to={{
+                        pathname: '/detail',
+                        state: {
+                            id: props.detailId,
+                        }
+                    }}>
+                        <img className=" mx-auto "
+                             src={props.img_icon_url}
+                             alt={props.parent_app}/>
+                    </Link>
                 </div>
             </div>
             }
