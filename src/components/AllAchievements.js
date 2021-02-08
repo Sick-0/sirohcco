@@ -12,8 +12,32 @@ function AllAchievements() {
     const [offset, setOffset] = useState(99);
     const [pagedData, setPagedData] = useState([]);
 
+    const handleOnChange = e => {
+        let filtered;
+        if (e.target.value !== "") {
+            console.log("FILTER = " + e.target.value);
+            filtered = achievements.filter(achi => {
+                return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
+            })
+        } else {
+            filtered = achievements
+            console.log("EMPTY FILTER")
+        }
+        setFilteredAchievements(filtered);
+        let pages = filtered.length / offset;
+        setPageCount(pages);
+        handlePageClick({selected: 0});
+        console.log("DID I HANDLE SOME CHANGE");
 
-//TODO get this from session
+    }
+
+    const handlePageClick = (data) => {
+        let selected = data.selected;
+        console.log("PAGE CHANGE TO " + selected);
+        let off = Math.ceil(selected * offset);
+        setPagedData(filteredAchievements.slice(off, off + offset));
+    };
+
     useEffect(() => {
         const fetchData = async () => {
             const result = await axios.get(
@@ -27,6 +51,8 @@ function AllAchievements() {
             );
             if (result.data) {
                 setData(result.data);
+                console.log(result.data);
+                console.log("I GOT THE DATA");
             }
         };
 
@@ -34,44 +60,33 @@ function AllAchievements() {
     }, []);
 
     useEffect(() => {
-        const orgAchievements = async () => {
-            let tempArr = [];
+        if (data.length !== 0) {
+            const orgAchievements = async () => {
+                let tempArr = [];
 
-            data.forEach(object => {
-                if (object.achievements) {
-                    object.achievements.forEach(function (achi, index) {
-                        let tempObj = achi;
-                        tempObj.gameName = object.name;
-                        tempObj.appid = object.appid;
-                        tempArr.push(tempObj);
-                    })
-                }
-            })
-            setAchievements(tempArr);
-            setFilteredAchievements(tempArr);
-            let pages = tempArr.length / offset;
-            setPageCount(pages);
+                data.forEach(object => {
+                    if (object.achievements) {
+                        object.achievements.forEach(function (achi, index) {
+                            let tempObj = achi;
+                            tempObj.gameName = object.name;
+                            tempObj.appid = object.appid;
+                            tempArr.push(tempObj);
+                        })
+                    }
+                })
+                setAchievements(tempArr);
+                setFilteredAchievements(tempArr);
+                let pages = tempArr.length / offset;
+                setPageCount(pages);
+                console.log("I FILTERED THE DATA");
+                handlePageClick({selected: 0});
 
-        };
 
-        orgAchievements();
+            };
+
+            orgAchievements();
+        }
     }, [data]);
-
-    const handleOnChange = e => {
-        const filtered = achievements.filter(achi => {
-            return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
-        })
-        setFilteredAchievements(filtered);
-        let pages = filtered.length / offset;
-        setPageCount(pages);
-        handlePageClick({selected: 0});
-    }
-
-    const handlePageClick = (data) => {
-        let selected = data.selected;
-        let off = Math.ceil(selected * offset);
-        setPagedData(filteredAchievements.slice(off, off + offset));
-    };
 
     return (
         <div>
@@ -113,7 +128,7 @@ function AllAchievements() {
 
                         )
 
-                    }) : <p>LOADING</p>
+                    }) : <p>LOADING LOADING LOADING</p>
                 }
             </div>
             <ReactPaginate
