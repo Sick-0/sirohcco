@@ -3,12 +3,18 @@ import '../App.css';
 function FlipBadge(props) {
 
     const [isHover, setIsHover] = useState(false);
+
+
+    let front="CardFront bg-"+props.colorBackGround+ " text-"+props.textColor+ " border-solid border-8 border-"+props.border +" p-2 m-2 rounded-2xl"
+    let back="CardBack bg-"+props.colorBackGround+  " text-"+props.textColor+" border-solid border-8 border-"+props.border + " p-2 m-2 rounded-2xl"
     //thanks to kayalin
+
+
     return (
         <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} className={""}>
 
 
-            {!isHover && <div className="CardFront bg-blue-400 border-double border-8 border-yellow-700 p-2 m-2 rounded-2xl">
+            {!isHover && <div className={front}>
                 <img className="mx-auto"
                      src={props.icon}
                      alt="Trophy icon but big"/>
@@ -17,7 +23,7 @@ function FlipBadge(props) {
 
             {isHover &&
 
-            <div className="CardBack bg-blue-400 border-double border-8 border-yellow-700 p-2 m-2 rounded-2xl">
+            <div className={back}>
                 <div className="flex items-center">
                     <img className=" ml-6 w-1/4 h-1/4 mr-6"
                          src={props.icon}

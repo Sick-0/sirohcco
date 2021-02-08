@@ -27,7 +27,6 @@ function AllAchievements() {
             );
             if (result.data) {
                 setData(result.data);
-
             }
         };
 
@@ -50,9 +49,8 @@ function AllAchievements() {
             })
             setAchievements(tempArr);
             setFilteredAchievements(tempArr);
-            let pages = tempArr.length / 100;
+            let pages = tempArr.length / offset;
             setPageCount(pages);
-            handlePageClick({selected: 0});
 
         };
 
@@ -64,9 +62,8 @@ function AllAchievements() {
             return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
         })
         setFilteredAchievements(filtered);
-        let pages = filtered.length / 100;
+        let pages = filtered.length / offset;
         setPageCount(pages);
-        console.log(pagedData);
         handlePageClick({selected: 0});
     }
 
@@ -82,16 +79,41 @@ function AllAchievements() {
             <SearchBar handleOnChange={handleOnChange}>...</SearchBar>
             <div className="grid grid-cols-3 gap-4">
                 {
-                    pagedData && pagedData.map((value, index) => {
+                    pagedData ? pagedData.map((value, index) => {
+                        //hier?
+                        var border = "";
+                        var colorBackGround = "";
+                        var textColor = "";
+
+                        if (value.achieved === 1) {
+                            colorBackGround = "purple-300"
+                            textColor = "black"
+                        } else {
+                            colorBackGround = "gray-300"
+                            textColor = "black"
+                        }
+
+                        if (value.percent < 100 && value.percent >= 70) {
+                            border = "gray-700";
+                        } else if (value.percent < 70 && value.percent >= 40) {
+                            border = "green-600"
+                        } else if (value.percent < 40 && value.percent >= 10) {
+                            border = "purple-500"
+                        } else {
+                            border = "yellow-500"
+                        }
                         return (
                             <div key={index}>
                                 <FlipBadge name={value.displayName} description={value.description}
                                            date={value.unlocktime} percent={value.percent} achieved={value.achieved}
-                                           icon={value.achieved ? value.icon : value.icongray}/>
+                                           icon={value.achieved ? value.icon : value.icongray} border={border}
+                                           colorBackGround={colorBackGround} textColor={textColor}/>
                             </div>
+
+
                         )
 
-                    })
+                    }) : <p>LOADING</p>
                 }
             </div>
             <ReactPaginate
@@ -106,6 +128,7 @@ function AllAchievements() {
                 containerClassName={'pagination'}
                 subContainerClassName={'pages pagination'}
                 activeClassName={'active'}
+                initialPage={0}
             />
         </div>
     );
