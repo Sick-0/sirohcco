@@ -319,6 +319,7 @@ async function getAllUserAchievements(arr, userId) {
         body.forEach(res => {
             if (res)
                 if (Object.keys(res.data).length !== 0) {
+                    console.log("IS AXIOS ERRROR AL GEPASSEERD THO");
                     achievementsToReturn.push(res.data);
                 }
                 else{
@@ -330,6 +331,8 @@ async function getAllUserAchievements(arr, userId) {
         })
         for (let i = 0; i < achievementsToReturn.length; i++) {
             if (Object.keys(achievementsToReturn[i].playerstats).length !== 0) {
+                console.log("MAYBE HE IS HERE THEN?");
+                console.log(achievementsToReturn[i].playerstats);
                 achievementsToReturn[i].playerstats.appid = appID[i];
             }
             else{
