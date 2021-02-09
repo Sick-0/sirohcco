@@ -243,11 +243,14 @@ async function getAllAchiements(userId) {
     const allUserGamesData = await allGames(userId)
 
     let allUserGames = allUserGamesData.data.response.games;
+
+    //TODO hier moet beter -> has community stats liegt dus extra handeling below ;;;;; kan beter
     let GamesWithAchievements = Object.values(allUserGames).filter((array) => {
         return array.has_community_visible_stats
     });
 
     const userAchievements = await getAllUserAchievements(GamesWithAchievements, userId);
+
     let toDeleteArr = [];
     userAchievements.map(game => {
         if (game.success) {
@@ -323,6 +326,8 @@ async function getAllUserAchievements(arr, userId) {
         //create a promise for each API call
         return getAchievements(userId, id.appid)
     });
+
+    //arr met appid
 
     return await Promise.all(requests).then((body) => {
         //this gets called when all the promises have resolved/rejected.

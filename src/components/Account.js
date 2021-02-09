@@ -55,7 +55,7 @@ function Account() {
         <div>
             <h1>Account</h1>
             { data.user && <h1>user: {data.user.displayName}</h1>}
-            { data.user && <img alt={"profile pic for " + data.user.displayName} src={data.user.photos[2].value}/>}
+            { data.user && <img className="mx-auto" alt={"profile pic for " + data.user.displayName} src={data.user.photos[2].value}/>}
 
 
             <div className="grid grid-cols-3 gap-2 place-content-evenly">

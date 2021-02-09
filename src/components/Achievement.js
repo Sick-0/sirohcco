@@ -3,9 +3,9 @@ import React from 'react';
 function Achievement(props) {
 
     return (
-        <div className="bg-green-400 w-100 m-2 rounded-2xl p-3 shadow-md md:text-sm hover:shadow-2xl text-black">
+        <div className="bg-purple-300 w-100 m-2 rounded-2xl p-3 shadow-md md:text-sm hover:shadow-2xl text-black">
 
-            <img className="mx-auto pb-2 rounded-3xl"
+            <img className="mx-auto pb-2 "
                  src={props.image}
                  alt={"Card image for" + props.name}/>
             <h1 className="text-3xl p-1 mb-1">{props.name}</h1>
