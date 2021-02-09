@@ -13,78 +13,112 @@ function AllAchievements() {
     const [offset, setOffset] = useState(99);
     const [pagedData, setPagedData] = useState([]);
     //TODO states for filters +
-    const [rarityDirection, setRarityDirection] = useState("asc");
+
     const [isAchievedFilter, setIsAchievedFilter] = useState(1);
 
-    const handleOnChange = e => {
-        let filtered;
-        if (e.target.value !== "") {
-            filtered = achievements.filter(achi => {
-                return achi.displayName.toLowerCase().includes(e.target.value.toLowerCase())
-            })
-        } else {
-            filtered = achievements
-        }
+    const [isClickedAchived, setIsClickedAchived] = useState(false);
+    const [rarityDirection, setRarityDirection] = useState("");
+    const [searchTerm, setSearchTerm] = useState("");
+
+    const getAchivements = (filtered) => {
         setFilteredAchievements(filtered);
         let pages = filtered.length / offset;
         setPageCount(pages);
-        handlePageClick({selected: 0});
+        handlePageClick({ selected: 0 });
+    };
 
-    }
-    //TODO add flip for rarity + add achieved + date AND THE COMBO OF FILTERS
-    const sortRarity = e => {
-        if (rarityDirection === "asc") {
-            let tempArr = filteredAchievements.sort(function (a, b) {
-                return a.percent - b.percent
-            })
+    const theOne = (rarityDirection, isClickedAchived, search) => {
+        if (rarityDirection) {
+            const tempArr = filteredAchievements.sort(function (a, b) {
+                return a.percent - b.percent;
+            });
             setFilteredAchievements(tempArr);
-            setRarityDirection("desc");
-        } else {
-            let tempArr = filteredAchievements.sort(function (a, b) {
-                return b.percent - a.percent
-            })
-            setFilteredAchievements(tempArr);
-            setRarityDirection("asc");
         }
-        console.log(e);
+        if (!rarityDirection && rarityDirection !== "") {
+            const tempArr = filteredAchievements.sort(function (a, b) {
+                return b.percent - a.percent;
+            });
+            setFilteredAchievements(tempArr);
+        }
+        if (isClickedAchived) {
+            const tempArr = achievements.filter(function (a) {
+                return a.achieved === isAchievedFilter;
+            });
+            setFilteredAchievements(tempArr);
+        }
+        if (isClickedAchived && rarityDirection) {
+            const tempArr = achievements.filter(function (a) {
+                return a.achieved === isAchievedFilter;
+            });
+            setFilteredAchievements(
+                tempArr.sort(function (a, b) {
+                    return a.percent - b.percent;
+                })
+            );
+        }
+        if (isClickedAchived && !rarityDirection && rarityDirection !== "") {
+            const tempArr = achievements.filter(function (a) {
+                return a.achieved === isAchievedFilter;
+            });
+            setFilteredAchievements(
+                tempArr.sort(function (a, b) {
+                    return b.percent - a.percent;
+                })
+            );
+        }
+        if (search && !isClickedAchived) {
+            const filteredData = achievements.filter((achi) => {
+                return achi.displayName.toLowerCase().includes(search.toLowerCase());
+            });
+            return getAchivements(filteredData);
+        }
+        if (search && isClickedAchived) {
+            const filteredData = filteredAchievements.filter((achi) => {
+                return achi.displayName.toLowerCase().includes(search.toLowerCase());
+            });
+            return getAchivements(filteredData);
+        }
+        if (!search && !isClickedAchived) return getAchivements(achievements);
+    };
 
-    }
+    const handleOnChange = ({ target: { value } }) => {
+        setSearchTerm(value);
+    };
 
-    //TODO NO FUNCTION PER FILTER -> ONE FILTER FUNCTION CHECKING ALL STATES
-    const achievedFilter = e => {
-        console.log(achievements);
-        let tempArr = achievements.filter(function (a) {
-            return a.achieved === isAchievedFilter
-        })
-        console.log(tempArr);
-        setFilteredAchievements(tempArr);
-    }
+    const sortRarity = () => {
+        setRarityDirection((prevCheck) => !prevCheck);
+    };
+
+    const achievedFilter = (e) => {
+        setIsClickedAchived(true);
+    };
 
     const handlePageClick = (data) => {
         if (filteredAchievements.length !== 0) {
             let selected = data.selected;
             let off = Math.ceil(selected * offset);
             setPagedData(filteredAchievements.slice(off, off + offset));
-
         } else {
             console.log("Gonna have toclick again");
         }
     };
 
     useEffect(() => {
+        theOne(rarityDirection, isClickedAchived, searchTerm);
+    }, [rarityDirection, isClickedAchived, searchTerm]);
+
+    useEffect(() => {
         const fetchData = async () => {
-            const result = await axios.get(
-                'api/allachievements',
-                {
-                    proxy: {
-                        port: 8080
-                    },
-                    credentials: 'include',
-                }
-            );
+            const result = await axios.get("api/allachievements", {
+                proxy: {
+                    port: 8080,
+                },
+                credentials: "include",
+            });
             if (result.data) {
                 setData(result.data);
             }
+            console.log(result.data);
         };
 
         fetchData();
@@ -95,7 +129,7 @@ function AllAchievements() {
             const orgAchievements = async () => {
                 let tempArr = [];
 
-                data.forEach(object => {
+                data.forEach((object) => {
                     if (object.achievements) {
                         object.achievements.forEach(function (achi, index) {
                             let tempObj = achi;
@@ -103,35 +137,35 @@ function AllAchievements() {
                             tempObj.gameName = object.name;
                             tempObj.appid = object.appid;
                             tempArr.push(tempObj);
-                        })
+                            tempArr.push(tempObj);
+                        });
                     }
-                })
+                });
                 setAchievements(tempArr);
                 setFilteredAchievements(tempArr);
             };
 
             orgAchievements();
         } else {
-            console.log("EMPTY OBJECT")
+            console.log("EMPTY OBJECT");
         }
-
     }, [data]);
 
     useEffect(() => {
         let pages = filteredAchievements.length / offset;
         setPageCount(pages);
-        handlePageClick({selected: 0});
-    }, [filteredAchievements, rarityDirection])
+        handlePageClick({ selected: 0 });
+    }, [filteredAchievements, rarityDirection]);
 
     return (
         <div>
             <h1>All Achievements</h1>
-            <SearchBar handleOnChange={handleOnChange}>...</SearchBar>
+            <SearchBar handleOnChange={handleOnChange}>{searchTerm}</SearchBar>
             <p onClick={sortRarity}>Sort rarity {rarityDirection}</p>
             <p onClick={achievedFilter}>Set achieved is {isAchievedFilter}</p>
             <div className="grid grid-cols-3 gap-4">
                 {
-                    pagedData ? pagedData.map((value, index) => {
+                    pagedData.length ? pagedData.map((value, index) => {
                         //hier?
                         var border = "";
                         var colorBackGround = "";

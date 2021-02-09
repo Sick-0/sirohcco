@@ -8,7 +8,7 @@ function FlipBadge(props) {
 
 
     let front = "CardFront bg-" + props.colorBackGround + " text-" + props.textColor + " border-solid border-8 border-" + props.border + " p-2 m-2 rounded-2xl"
-    let back = "CardBack bg-" + props.colorBackGround + " text-" + props.textColor + " border-solid border-8 border-" + props.border + " p-2 m-2 rounded-2xl"
+    let back = "CardBack overflow-auto bg-" + props.colorBackGround + " text-" + props.textColor + " border-solid border-8 border-" + props.border + " p-2 m-2 rounded-2xl"
     //thanks to kayalin
 
 

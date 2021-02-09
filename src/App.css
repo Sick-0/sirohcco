@@ -63,9 +63,23 @@
 
 .CardBack{
   width:400px;
+  height:275px
 }
 
 .IconFront{
   width:80px;
   height:80px;
+}
+
+.overviewCard{
+  height:175px;
+}
+
+.achievementCardIcon{
+  width:80px;
+  height:80px;
+}
+
+.achievementCard{
+  height:250px
 }
