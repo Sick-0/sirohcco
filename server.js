@@ -254,7 +254,7 @@ async function getAllAchiements(userId) {
     let allGamesClean = userAchievements.map(achi => {
         achi.playerstats.name = achi.playerstats.gameName;
         delete achi.playerstats.gameName;
-        console.log(achi.playerstats); //here we might yeet him
+        if (achi.playerstats)
         return achi.playerstats;
     })
 
@@ -318,8 +318,14 @@ async function getAllUserAchievements(arr, userId) {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
             if (res)
-
+                if (Object.keys(res.data).length !== 0) {
                     achievementsToReturn.push(res.data);
+                }
+                else{
+                    console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    console.log(res.playerstats);
+                }
+
 
         })
         for (let i = 0; i < achievementsToReturn.length; i++) {
@@ -327,6 +333,7 @@ async function getAllUserAchievements(arr, userId) {
                 achievementsToReturn[i].playerstats.appid = appID[i];
             }
             else{
+                console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 console.log(achievementsToReturn[i]);
             }
         }
@@ -349,6 +356,11 @@ async function getAllGameData(arr) {
             if (res) {
                 if (Object.keys(res.data).length !== 0) {
                     gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
+                }
+                else
+                {
+                    console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    console.log(res.data);
                 }
             }
         })
