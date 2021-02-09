@@ -337,7 +337,9 @@ async function getAllGameData(arr) {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
             if (res) {
-                gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
+                if (Object.keys(res.data).length !== 0) {
+                    gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
+                }
             }
         })
         return gamesToReturn;
