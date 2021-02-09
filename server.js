@@ -248,13 +248,27 @@ async function getAllAchiements(userId) {
     });
 
     const userAchievements = await getAllUserAchievements(GamesWithAchievements, userId);
+    let toDeleteArr = [];
+    userAchievements.map(game => {
+        if (game.success) {
+            return game;
+        } else {
+            toDeleteArr.push(game.appid);;
+        }
+    });
+
+    toDeleteArr.forEach(id => {
+        GamesWithAchievements = GamesWithAchievements.filter(function (obj) {
+            return obj.appid !== id;
+        });
+    })
+
     const globalAchievements = await getGlobalAchievements(GamesWithAchievements);
     const allGameData = await getAllGameData(GamesWithAchievements);
 
     let allGamesClean = userAchievements.map(achi => {
         achi.playerstats.name = achi.playerstats.gameName;
         delete achi.playerstats.gameName;
-        if (achi.playerstats)
         return achi.playerstats;
     })
 
@@ -309,41 +323,23 @@ async function getAllUserAchievements(arr, userId) {
         //create a promise for each API call
         return getAchievements(userId, id.appid)
     });
-    let appID = arr.map(id => {
-        //create a apppid array to store og appid
-        return id.appid;
-    });
 
     return await Promise.all(requests).then((body) => {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
-            if (res)
-                if (Object.keys(res.data).length !== 0) {
-                    console.log("IS AXIOS ERRROR AL GEPASSEERD THO");
-                    achievementsToReturn.push(res.data);
-                }
-                else{
-                    console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    console.log(res.playerstats);
-                }
+            if (res) {
 
+                res.data.playerstats.appid = res.config.params.appid;
+                achievementsToReturn.push(res.data);
+            }
 
         })
-        for (let i = 0; i < achievementsToReturn.length; i++) {
-            if (Object.keys(achievementsToReturn[i].playerstats).length !== 0) {
-                console.log("MAYBE HE IS HERE THEN?");
-                console.log(achievementsToReturn[i].playerstats);
-                achievementsToReturn[i].playerstats.appid = appID[i];
-            }
-            else{
-                console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                console.log(achievementsToReturn[i]);
-            }
-        }
         return achievementsToReturn;
-    }).catch(err => console.log(err))
+    }).catch((err) => {
+        console.log("HIER GAAT HIJ FOUT");
+        console.log(err);
+    })
 }
-
 
 
 async function getAllGameData(arr) {
@@ -359,9 +355,7 @@ async function getAllGameData(arr) {
             if (res) {
                 if (Object.keys(res.data).length !== 0) {
                     gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
-                }
-                else
-                {
+                } else {
                     console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                     console.log(res.data);
                 }
@@ -383,8 +377,11 @@ async function getGlobalAchievements(arr) {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
             if (res) {
-                if (Object.keys(res.data).length !== 0){
-                achievementsToReturn.push({appid: res.config.params.gameid, achievementData: res.data.achievementpercentages});
+                if (Object.keys(res.data).length !== 0) {
+                    achievementsToReturn.push({
+                        appid: res.config.params.gameid,
+                        achievementData: res.data.achievementpercentages
+                    });
                 }
             }
         })
