@@ -243,7 +243,9 @@ async function getAllAchiements(userId) {
     const allUserGamesData = await allGames(userId)
 
     let allUserGames = allUserGamesData.data.response.games;
-    let GamesWithAchievements = Object.values(allUserGames).filter(array => array.has_community_visible_stats);
+    let GamesWithAchievements = Object.values(allUserGames).filter((array) => {
+        return array.has_community_visible_stats
+    });
 
     const userAchievements = await getAllUserAchievements(GamesWithAchievements, userId);
     const globalAchievements = await getGlobalAchievements(GamesWithAchievements);
@@ -252,6 +254,7 @@ async function getAllAchiements(userId) {
     let allGamesClean = userAchievements.map(achi => {
         achi.playerstats.name = achi.playerstats.gameName;
         delete achi.playerstats.gameName;
+        console.log(achi.playerstats); //here we might yeet him
         return achi.playerstats;
     })
 
@@ -307,7 +310,7 @@ async function getAllUserAchievements(arr, userId) {
         return getAchievements(userId, id.appid)
     });
     let appID = arr.map(id => {
-        //create a promise for each API call
+        //create a apppid array to store og appid
         return id.appid;
     });
 
@@ -315,10 +318,17 @@ async function getAllUserAchievements(arr, userId) {
         //this gets called when all the promises have resolved/rejected.
         body.forEach(res => {
             if (res)
-                achievementsToReturn.push(res.data)
+
+                    achievementsToReturn.push(res.data);
+
         })
         for (let i = 0; i < achievementsToReturn.length; i++) {
-            achievementsToReturn[i].playerstats.appid = appID[i];
+            if (Object.keys(achievementsToReturn[i].playerstats).length !== 0) {
+                achievementsToReturn[i].playerstats.appid = appID[i];
+            }
+            else{
+                console.log(achievementsToReturn[i]);
+            }
         }
         return achievementsToReturn;
     }).catch(err => console.log(err))
