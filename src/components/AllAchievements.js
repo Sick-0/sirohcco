@@ -137,7 +137,6 @@ function AllAchievements() {
                             tempObj.gameName = object.name;
                             tempObj.appid = object.appid;
                             tempArr.push(tempObj);
-                            tempArr.push(tempObj);
                         });
                     }
                 });
