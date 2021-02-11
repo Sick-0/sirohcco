@@ -5,8 +5,13 @@ var express = require('express')
     , SteamStrategy = require('passport-steam').Strategy;
 
 var cors = require('cors')
-var axios = require('axios');
-require('dotenv').config()
+require('dotenv').config();
+
+const getGlobalStats = require('./helpers/getGlobalStats');
+const allGames = require('./helpers/allGames');
+const gameDetail = require('./helpers/gameDetail');
+const getAchievements = require('./helpers/getAchievements');
+const getAllAchievements = require('./helpers/getAllAchievements');
 
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
@@ -28,8 +33,8 @@ passport.deserializeUser(function (obj, done) {
 //   credentials (in this case, an OpenID identifier and profile), and invoke a
 //   callback with a user object.
 passport.use(new SteamStrategy({
-        returnURL: 'http://localhost:8080/auth/steam/return',
-        realm: 'http://localhost:8080/',
+        returnURL: process.env.RETURN_URL,
+        realm: process.env.REALM,
         apiKey: process.env.API_KEY
     },
     function (identifier, profile, done) {
@@ -51,8 +56,8 @@ var server = express();
 
 server.use(cors())
 server.use(session({
-    secret: 'terces-sirohcco',
-    name: 'sirohcco-session',
+    secret: process.env.SECRET,
+    name: process.env.NAME,
     resave: true,
     saveUninitialized: true
 }));
@@ -64,7 +69,7 @@ server.use(passport.session());
 
 //home route
 server.get('/', function (req, res) {
-    res.redirect("http://localhost:3000/");
+    res.redirect(process.env.HOMEPAGE);
 });
 
 //api home test
@@ -103,7 +108,7 @@ server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
 
 server.get('/api/allachievements', ensureAuthenticated, async function (req, res) {
     console.log('all achievements ROUTE hit');
-    let allA = await getAllAchiements(req.user.id);
+    let allA = await getAllAchievements(req.user.id);
     res.send(allA);
 })
 
@@ -130,7 +135,7 @@ server.get('/api/percentage/', ensureAuthenticated, async function (req, res) {
 //logout route
 server.get('/logout', function (req, res) {
     req.logout();
-    res.redirect('http://localhost:3000/');
+    res.redirect( process.env.HOMEPAGE);
 });
 
 // GET /auth/steam
@@ -152,10 +157,11 @@ server.get('/auth/steam',
 server.get('/auth/steam/return',
     passport.authenticate('steam', {failureRedirect: '/'}),
     function (req, res) {
-        res.redirect("http://localhost:3000/account");
+    console.log("welcome back from steam");
+        res.redirect(process.env.HOMEPAGE);
     });
 
-server.listen(8080);
+server.listen('8080');
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -169,230 +175,11 @@ function ensureAuthenticated(req, res, next) {
     res.redirect('/');
 }
 
-async function allGames(id) {
-    try {
-        return await axios.get(
-            'https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/',
-            {
-                params: {
-                    key: process.env.API_KEY,
-                    steamid: id,
-                    include_appinfo: 'true',
-                    include_played_free_games: 'true',
-                }
-            }
-        );
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-async function gameDetail(appid) {
-    try {
-        return await axios.get(
-            'http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2',
-            {
-                params: {
-                    key: process.env.API_KEY,
-                    appid: appid,
-                }
-            }
-        );
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-async function getAchievements(id, appid) {
-    try {
-        return await axios.get(
-            'https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/',
-            {
-                params: {
-                    key: process.env.API_KEY,
-                    steamid: id,
-                    appid: appid,
-                }
-            }
-        );
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-async function getGlobalStats(appid) {
-    try {
-        return await axios.get(
-            'https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/',
-            {
-                params: {
-                    key: process.env.API_KEY,
-                    gameid: appid,
-                }
-            }
-        );
-    } catch (error) {
-        console.error(error)
-    }
-}
-
-//TODO improve and refactor Thanks to Xander
-//Thanks to Xander
-async function getAllAchiements(userId) {
-
-    const allUserGamesData = await allGames(userId)
-
-    let allUserGames = allUserGamesData.data.response.games;
-
-    //TODO hier moet beter -> has community stats liegt dus extra handeling below ;;;;; kan beter
-    let GamesWithAchievements = Object.values(allUserGames).filter((array) => {
-        return array.has_community_visible_stats
-    });
-
-    const userAchievements = await getAllUserAchievements(GamesWithAchievements, userId);
-
-    let toDeleteArr = [];
-    userAchievements.map(game => {
-        if (game.success) {
-            return game;
-        } else {
-            toDeleteArr.push(game.appid);;
-        }
-    });
-
-    toDeleteArr.forEach(id => {
-        GamesWithAchievements = GamesWithAchievements.filter(function (obj) {
-            return obj.appid !== id;
-        });
-    })
-
-    const globalAchievements = await getGlobalAchievements(GamesWithAchievements);
-    const allGameData = await getAllGameData(GamesWithAchievements);
-
-    let allGamesClean = userAchievements.map(achi => {
-        achi.playerstats.name = achi.playerstats.gameName;
-        delete achi.playerstats.gameName;
-        return achi.playerstats;
-    })
-
-    const allGamesAndAchievements = joinArr("appid", GamesWithAchievements, globalAchievements, allGameData, allGamesClean);
-
-    if (allGamesAndAchievements) {
-        allGamesAndAchievements.forEach(object => {
-            if (object.achievements && object.achievementData.achievements && object.gameData.game.availableGameStats.achievements) {
-                object.achievements.forEach(function (achi, index) {
-                    object.achievements[index] = Object.assign(achi, search(achi.apiname, object.achievementData.achievements));
-                    object.achievements[index] = Object.assign(achi, search(achi.apiname, object.gameData.game.availableGameStats.achievements));
-                })
-            }
-        })
-    }
-
-    allGamesAndAchievements.forEach(object => {
-        delete object.achievementData;
-        delete object.gameData;
-    })
-
-    return allGamesAndAchievements;
-}
-
-function search(nameKey, myArray) {
-    for (var i = 0; i < myArray.length; i++) {
-        if (myArray[i].name === nameKey) {
-            return myArray[i];
-        }
-    }
-}
-
-function joinArr(key, ...ar) {
-    let arrs = [];
-    ar.forEach(a => arrs = [...arrs, ...a]);
-    const noDuplicate = arr => [...new Set(arr)]
-    const allIds = arrs.map(ele => ele[key]);
-    const ids = noDuplicate(allIds);
-
-    return ids.map(id =>
-        arrs.reduce((self, item) => {
-            return item[key] === id ?
-                {...self, ...item} : self
-        }, {})
-    )
-}
-
-async function getAllUserAchievements(arr, userId) {
-
-    let achievementsToReturn = []
-    let requests = arr.map(id => {
-        //create a promise for each API call
-        return getAchievements(userId, id.appid)
-    });
-
-    //arr met appid
-
-    return await Promise.all(requests).then((body) => {
-        //this gets called when all the promises have resolved/rejected.
-        body.forEach(res => {
-            if (res) {
-
-                res.data.playerstats.appid = res.config.params.appid;
-                achievementsToReturn.push(res.data);
-            }
-
-        })
-        return achievementsToReturn;
-    }).catch((err) => {
-        console.log("HIER GAAT HIJ FOUT");
-        console.log(err);
-    })
-}
 
 
-async function getAllGameData(arr) {
-    let gamesToReturn = []
-    let requests = arr.map(id => {
-        //create a promise for each API call
-        return gameDetail(id.appid)
-    });
 
-    return await Promise.all(requests).then((body) => {
-        //this gets called when all the promises have resolved/rejected.
-        body.forEach(res => {
-            if (res) {
-                if (Object.keys(res.data).length !== 0) {
-                    gamesToReturn.push({appid: res.config.params.appid, gameData: res.data});
-                } else {
-                    console.log("FOUT HIER!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-                    console.log(res.data);
-                }
-            }
-        })
-        return gamesToReturn;
-    }).catch(err => console.log(err))
-}
 
-async function getGlobalAchievements(arr) {
 
-    let achievementsToReturn = []
-    let requests = arr.map(id => {
-        //create a promise for each API call
-        return getGlobalStats(id.appid)
-    });
-
-    return await Promise.all(requests).then((body) => {
-        //this gets called when all the promises have resolved/rejected.
-        body.forEach(res => {
-            if (res) {
-                if (Object.keys(res.data).length !== 0) {
-                    achievementsToReturn.push({
-                        appid: res.config.params.gameid,
-                        achievementData: res.data.achievementpercentages
-                    });
-                }
-            }
-        })
-        return achievementsToReturn;
-    }).catch(err => console.log(err))
-}
 
 //https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=1091500
 
