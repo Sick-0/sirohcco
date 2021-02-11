@@ -4,6 +4,8 @@ var express = require('express')
     , session = require('express-session')
     , SteamStrategy = require('passport-steam').Strategy;
 
+const path = require('path');
+
 var cors = require('cors')
 require('dotenv').config();
 
