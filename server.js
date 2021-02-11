@@ -159,7 +159,6 @@ server.get('/auth/steam',
 server.get('/auth/steam/return',
     passport.authenticate('steam', {failureRedirect: '/'}),
     function (req, res) {
-    console.log("welcome back from steam");
         res.redirect(process.env.HOMEPAGE);
     });
 

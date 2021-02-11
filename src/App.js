@@ -39,7 +39,6 @@ function App() {
 
     return (
         <div className="App">
-
             <header className="App-header">
                 <ul>
                     <li><Link to="/">Home</Link></li>
