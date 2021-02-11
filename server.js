@@ -69,10 +69,7 @@ server.use(session({
 server.use(passport.initialize());
 server.use(passport.session());
 
-//home route
-server.get('/', function (req, res) {
-    res.redirect(process.env.HOMEPAGE);
-});
+server.use(express.static(path.join(__dirname, "build/")));
 
 //api home test
 server.get('/api/home', function (req, res) {
@@ -162,7 +159,15 @@ server.get('/auth/steam/return',
         res.redirect(process.env.HOMEPAGE);
     });
 
-server.listen(process.env.PORT);
+server.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'build/index.html'));
+});
+
+server.use((req, res) => {
+    res.status(404).json({message: 'Route Not Found'});
+});
+
+server.listen(process.env.PORT );
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
@@ -175,10 +180,3 @@ function ensureAuthenticated(req, res, next) {
     }
     res.redirect('/');
 }
-
-
-//https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=1091500
-
-//http://api.steampowered.com/ISteamUserStats/GetSchemaForGame/v2
-
-//https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/
