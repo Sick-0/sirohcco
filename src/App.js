@@ -45,7 +45,7 @@ function App() {
                     <li><Link to="/">Home</Link></li>
                     <li><Link to="/account">Account</Link></li>
                     <li><Link to="/all">All Achievements</Link></li>
-                    {!isLoggedIn ? <li><a href="http://localhost:8080/auth/steam">Login</a></li> : <li><a href="http://localhost:8080/logout">Logout</a></li>}
+                    {!isLoggedIn ? <li><a href="https://steam-achievement-hunter.herokuapp.com/auth/steam">Login</a></li> : <li><a href="https://steam-achievement-hunter.herokuapp.com/logout">Logout</a></li>}
                 </ul>
             </header>
 

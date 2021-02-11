@@ -163,7 +163,7 @@ server.get('/auth/steam/return',
         res.redirect(process.env.HOMEPAGE);
     });
 
-server.listen('8080');
+server.listen(process.env.PORT);
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
