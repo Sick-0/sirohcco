@@ -13,6 +13,8 @@ const gameDetail = require('./helpers/gameDetail');
 const getAchievements = require('./helpers/getAchievements');
 const getAllAchievements = require('./helpers/getAllAchievements');
 
+
+
 // Passport session setup.
 //   To support persistent login sessions, Passport needs to be able to
 //   serialize users into and deserialize users out of the session.  Typically,
@@ -78,7 +80,7 @@ server.get('/api/home', function (req, res) {
     if (req.user) {
         res.send('Hallo ' + req.user.displayName);
     } else {
-        res.send(' hello plz login :(');
+        res.send('Hello plz login :(');
     }
 });
 
@@ -174,11 +176,6 @@ function ensureAuthenticated(req, res, next) {
     }
     res.redirect('/');
 }
-
-
-
-
-
 
 
 //https://api.steampowered.com/ISteamUserStats/GetGlobalAchievementPercentagesForApp/v2/?gameid=1091500
