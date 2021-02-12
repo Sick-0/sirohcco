@@ -1,7 +1,7 @@
 # Getting Started with Steam API
 
 
-## Available Scripts
+## SETTING UP LOCAL DEV
 
 FIRST: create a .env file with following keys: 
 - API_KEY=XXXXXXXXXXXXXXXXXXXXXXXX (get one if need be here https://steamcommunity.com/dev/apikey)
