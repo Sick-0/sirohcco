@@ -3,9 +3,9 @@
 
 ## Available Scripts
 
-FIRST: create a .env file with following keys: 
+FIRST: create a .env file on root with following keys: 
 - API_KEY=XXXXXXXXXXXXXXXXXXXXXXXX (get one if need be here https://steamcommunity.com/dev/apikey)
-- SECRET=XXXXXXXXXXXX
+- SECRET=XXXXXXXXXXXX (can be anything
 - NAME=XXXXXXXXXXX
 - RETURN_URL=http://localhost:8080/auth/steam/return
 - REALM=http://localhost:8080/
