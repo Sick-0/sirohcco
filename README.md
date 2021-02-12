@@ -16,12 +16,12 @@ SECOND: In package .JSON remove HOMEPAGE and add
 - AND change start script to 'craco start'
 
 THIRD: 
-- In server comment the lines that ask to be commented :) 
+- In server comment the lines that ask to be commented :) (search for "//comment for local development")
 - and change the server.listen port to '8080'
 
 FOURTH:
 - In App.js at line 47 CHANGE THE HARDCODED LOGIN URL TO 
-- "localhost:8080/auth/steam" and "localhost:8080/logout"
+- "http://localhost:8080/auth/steam" and "http://localhost:8080/logout"
 
 In the project directory run `npm install`, then you run:
 
