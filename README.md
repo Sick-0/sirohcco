@@ -3,25 +3,40 @@
 
 ## Available Scripts
 
-FIRST: dont forget to create a .env file with your API_KEY -> explain how to get key
+FIRST: create a .env file with following keys: 
+- API_KEY=XXXXXXXXXXXXXXXXXXXXXXXX (get one if need be here https://steamcommunity.com/dev/apikey)
+- SECRET=XXXXXXXXXXXX
+- NAME=XXXXXXXXXXX
+- RETURN_URL=http://localhost:8080/auth/steam/return
+- REALM=http://localhost:8080/
+- HOMEPAGE=http://localhost:3000/
+
+SECOND: In package .JSON remove HOMEPAGE and add 
+- "proxy": "http://localhost:8080" 
+- AND change start script to 'craco start'
+
+THIRD: 
+- In server comment the lines that ask to be commented :) 
+- and change the server.listen port to '8080'
+
+FOURTH:
+- In App.js at line 47 CHANGE THE HARDCODED LOGIN URL TO 
+- "localhost:8080/auth/steam" and "localhost:8080/logout"
+
 In the project directory run `npm install`, then you run:
 
-### `npm start` AND `npm run server`
+### `npm start` AND `npm run server` IN TWO TERMINALS
 
 Start runs the react app in the development mode.\
 Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
 Run server runs the express server with NODEMON on [http://localhost:8080](http://localhost:8080) 
 
-## Learn More
-TODO FILL IN ACTUAL URLS AND FORMAT
-STEAM API URL
-EXPRESS URL
-REACT URL
-TAILWIND URL
-CRACO URL
-AXIOS URL
-PASSPORT(-steam)
+## TODO
+- Add comments
+- Error handeling
+- MOAR FILTERS
+
 
 ## GOAL
 

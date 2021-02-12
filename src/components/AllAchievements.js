@@ -67,7 +67,12 @@ function AllAchievements() {
     };
 
     const achievedFilter = (e) => {
-        setIsClickedAchived(true);
+        if (isClickedAchived) {
+            setIsClickedAchived(false);
+        }
+        else {
+            setIsClickedAchived(true);
+        }
     };
 
     const handlePageClick = (data) => {
@@ -75,8 +80,6 @@ function AllAchievements() {
             let selected = data.selected;
             let off = Math.ceil(selected * offset);
             setPagedData(filteredAchievements.slice(off, off + offset));
-        } else {
-            console.log("Gonna have toclick again");
         }
     };
 
@@ -137,8 +140,8 @@ function AllAchievements() {
         <div>
             <h1>All Achievements</h1>
             <SearchBar handleOnChange={handleOnChange}>{searchTerm}</SearchBar>
-            <p onClick={sortRarity}>Sort rarity {rarityDirection}</p>
-            <p onClick={achievedFilter}>Set achieved is {isAchievedFilter}</p>
+            <button onClick={sortRarity}>Sort rarity {rarityDirection}</button>
+            <button onClick={achievedFilter}>Set achieved is {isAchievedFilter}</button>
             <div className="grid grid-cols-3 gap-4">
                 {
                     pagedData.length ? pagedData.map((value, index) => {
