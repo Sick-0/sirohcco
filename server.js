@@ -169,7 +169,7 @@ server.use((req, res) => {
     res.status(404).json({message: 'Route Not Found'});
 });
 //change to 8080 for local dev for heroku call process.env.PORT
-server.listen(process.env.port || '8080');
+server.listen(process.env.PORT || '8080');
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
