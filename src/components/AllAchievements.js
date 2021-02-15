@@ -69,8 +69,7 @@ function AllAchievements() {
     const achievedFilter = (e) => {
         if (isClickedAchived) {
             setIsClickedAchived(false);
-        }
-        else {
+        } else {
             setIsClickedAchived(true);
         }
     };
@@ -171,23 +170,26 @@ function AllAchievements() {
                         }
 
 
+                        var rounded = (value.percent).toFixed(2);
+
                         return (
-                            <div key={index}>
-                                <FlipBadge name={value.displayName}
-                                           description={value.description}
-                                           date={value.unlocktime}
-                                           percent={value.percent}
-                                           achieved={value.achieved}
-                                           icon={value.achieved ? value.icon : value.icongray} border={border}
-                                           colorBackGround={colorBackGround}
-                                           textColor={textColor}
-                                           img_icon_url={value.img_icon_url}
-                                           detailId={value.appid}
-                                           parent_app={value.gameName}/>
-                            </div>
+                        <div key={index}>
+                            <FlipBadge name={value.displayName}
+                                       description={value.description}
+                                       date={value.unlocktime}
+                                       percent={value.percent}
+                                       achieved={value.achieved}
+                                       icon={value.achieved ? value.icon : value.icongray} border={border}
+                                       colorBackGround={colorBackGround}
+                                       textColor={textColor}
+                                       img_icon_url={value.img_icon_url}
+                                       detailId={value.appid}
+                                       parent_app={value.gameName}
+                                       rounded={rounded}
+                                       time={time}/>
 
-
-                        )
+                        </div>
+                    )
 
                     }) : <p>LOADING LOADING LOADING</p>
                 }
