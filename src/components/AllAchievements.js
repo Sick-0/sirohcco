@@ -3,12 +3,14 @@ import axios from "axios";
 import FlipBadge from "./FlipBadge";
 import SearchBar from "./SearchBar";
 import ReactPaginate from 'react-paginate';
+import Select from "react-select";
 
 // THANKS TO NIKITAAAAAAAAAH
 import {sortAscDesc} from "./helpers/sortAscDesc";
 import {isAchived} from "./helpers/isAchived";
 import {isAchivedSortAscDesc} from "./helpers/isAchivedSortAscDesc";
 import {searchFilter} from "./helpers/searchFilter";
+import {sortDateAscDesc} from "./helpers/sortDateAscDesc";
 
 function AllAchievements() {
     //TODO replace with REDUX or context
@@ -18,13 +20,20 @@ function AllAchievements() {
     const [pageCount, setPageCount] = useState(10);
     const [offset, setOffset] = useState(99);
     const [pagedData, setPagedData] = useState([]);
-    //TODO states for filters +
 
+    const [selectOptions, setSelectOptions] = useState([{}]);
+    const [chosenGames, setChosenGames] = useState([]);
+
+    //TODO states for filters +
     const [isAchievedFilter, setIsAchievedFilter] = useState(1);
 
     const [isClickedAchived, setIsClickedAchived] = useState(false);
     const [rarityDirection, setRarityDirection] = useState("");
     const [searchTerm, setSearchTerm] = useState("");
+    const [dateDirection, setDateDirection] = useState("");
+
+    //siccos filter test
+    const [filterArr, setFilterArr] = [{achieved: true,}];
 
 
     const getAchivements = (filtered) => {
@@ -73,6 +82,28 @@ function AllAchievements() {
             setIsClickedAchived(true);
         }
     };
+
+    const gameFilter = (e) => {
+        let tempArr = [];
+        console.log(e);
+        e.forEach(game => {
+            tempArr.push(game.value)
+        })
+        console.log(tempArr);
+        setChosenGames(tempArr);
+    };
+
+    useEffect(() => {
+        console.log(chosenGames);
+        chosenGames.forEach(value => {
+            const tempArr = filteredAchievements.filter(function (a) {
+                return a.appid === value;
+            });
+            setFilteredAchievements(tempArr);
+        })
+
+    }, [chosenGames]);
+
 
     const handlePageClick = (data) => {
         if (filteredAchievements.length !== 0) {
@@ -135,12 +166,61 @@ function AllAchievements() {
         handlePageClick({selected: 0});
     }, [filteredAchievements, rarityDirection]);
 
+    useEffect(() => {
+        let tempArr = [];
+        achievements.forEach(achi => {
+            if (!tempArr.some(e => e.value === achi.appid)) {
+                tempArr.push({value: achi.appid, label: achi.gameName})
+            }
+        })
+
+        setSelectOptions(tempArr);
+
+    }, [achievements])
+
     return (
         <div>
             <h1>All Achievements</h1>
             <SearchBar handleOnChange={handleOnChange}>{searchTerm}</SearchBar>
-            <button onClick={sortRarity}>Sort rarity {rarityDirection}</button>
+
+            <div className="my-2">Sort rarity {rarityDirection}</div>
+
+            <div className="w-12 relative my-1 cursor-pointer">
+                <div className="h-8 w-12 bg-gray-300 rounded-full">
+                    <div onClick={sortRarity}
+                         className="mt-1 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4">
+                    </div>
+                </div>
+            </div>
+
+            <div className="w-12 relative my-1 cursor-pointer">
+                <div className="h-8 w-12 bg-gray-300 rounded-full">
+                    <div
+                        className="mt-1 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4"></div>
+                </div>
+            </div>
+            <div className="w-8 py-1 relative my-1 cursor-pointer">
+                <div className="h-5 bg-gray-300 rounded-full">
+                    <div
+                        className="-ml-3 mt-p w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4"></div>
+                </div>
+            </div>
+
+            <div className="w-12 relative my-1 cursor-pointer">
+                <div className="h-8 w-12 bg-purple-600 rounded-full">
+                    <div
+                        className="mt-1 -ml-6 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-96"></div>
+                </div>
+            </div>
+            <div className="w-8 py-1 relative my-1 cursor-pointer">
+                <div className="h-5 bg-pink-600 rounded-full">
+                    <div
+                        className="-ml-3 mt-p w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-96"></div>
+                </div>
+            </div>
+
             <button onClick={achievedFilter}>Set achieved is {isAchievedFilter}</button>
+            <Select options={selectOptions} isMulti onChange={gameFilter}/>
             <div className="grid grid-cols-3 gap-4">
                 {
                     pagedData.length ? pagedData.map((value, index) => {
@@ -174,23 +254,23 @@ function AllAchievements() {
                         var time = new Date(value.unlocktime * 1000)
 
                         return (
-                        <div key={index}>
-                            <FlipBadge name={value.displayName}
-                                       description={value.description}
-                                       date={value.unlocktime}
-                                       percent={value.percent}
-                                       achieved={value.achieved}
-                                       icon={value.achieved ? value.icon : value.icongray} border={border}
-                                       colorBackGround={colorBackGround}
-                                       textColor={textColor}
-                                       img_icon_url={value.img_icon_url}
-                                       detailId={value.appid}
-                                       parent_app={value.gameName}
-                                       rounded={rounded}
-                                       time={time}/>
+                            <div key={index}>
+                                <FlipBadge name={value.displayName}
+                                           description={value.description}
+                                           date={value.unlocktime}
+                                           percent={value.percent}
+                                           achieved={value.achieved}
+                                           icon={value.achieved ? value.icon : value.icongray} border={border}
+                                           colorBackGround={colorBackGround}
+                                           textColor={textColor}
+                                           img_icon_url={value.img_icon_url}
+                                           detailId={value.appid}
+                                           parent_app={value.gameName}
+                                           rounded={rounded}
+                                           time={time}/>
 
-                        </div>
-                    )
+                            </div>
+                        )
 
                     }) : <p>LOADING LOADING LOADING</p>
                 }
