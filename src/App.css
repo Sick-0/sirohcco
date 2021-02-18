@@ -59,6 +59,7 @@
 
 .CardFront{
   width:400px;
+  height:200px;
 }
 
 .CardBack{
@@ -82,4 +83,10 @@
 
 .achievementCard{
   height:250px
+}
+.searchbar{
+  color: black;
+}
+.gameSelect{
+  color: black;
 }

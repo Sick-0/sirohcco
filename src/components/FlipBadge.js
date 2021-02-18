@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import '../App.css';
 import {Link} from "react-router-dom";
 import {Progress} from "react-sweet-progress"
+
 import "react-sweet-progress/lib/style.css";
 
 function FlipBadge(props) {
@@ -15,41 +16,59 @@ function FlipBadge(props) {
 
 
     return (
-        <div className={back}>
-            <div className="flex items-center">
-                <img className="ml-6 w-1/4 h-1/4 mr-6"
+        <div onMouseEnter={() => setIsHover(true)} onMouseLeave={() => setIsHover(false)} className={""}>
+            {!isHover && <div className={front}>
+                <img className="mx-auto IconFront"
                      src={props.icon}
-                     alt="Trophy icon but small"/>
-                <p>{props.name}</p>
-            </div>
-            <div className="text-center pb-2">
+                     alt="Trophy icon but big"/>
+                <p className="text-center pb-2">{props.name}</p>
+            </div>}
 
-                <Progress
-                theme={{
-                default: {
-                    symbol: props.achieved? '🌟': '',
-                    color: props.progress,
-                    trailColor: '#EFEFEF',
-                }}
+            {isHover &&
+
+            <div className={back}>
+                <div className="flex items-center">
+                    <img className="ml-6 w-1/4 h-1/4 mr-6"
+                         src={props.icon}
+                         alt="Trophy icon but small"/>
+                    <p>{props.name}</p>
+                </div>
+                <div className="text-center pb-2">
+                    <br/>
+                    <Progress
+                        theme={{
+                            default: {
+                                symbol: props.achieved ? '🌟' : ' ',
+                                color: props.progress,
+                                trailColor: '#EFEFEF',
+                            }
+                        }
+                        }
+                        type="circle"
+                        //upper en lower value percentage ex: 0% -> 1%
+                        //if 0% -> 100%
+                        percent={props.percent}
+                        status="default"
+                    />
+                    <p>{props.rounded}%</p>
+                    <p>{props.achieved ? props.time.toLocaleDateString() : ""}</p>
+                    <p>{props.description}</p>
+                    <Link className="w-1/8 h-1/8" to={{
+                        pathname: '/detail',
+                        state: {
+                            id: props.detailId,
+                        }
+                    }}>
+                        <img className=" mx-auto "
+                             src={props.img_icon_url}
+                             alt={props.parent_app}/>
+                    </Link>
+                </div>
+
+            </div>
             }
-                 type="circle"
-                 percent={props.rounded}
-                 status="default"
-            />
-            <p>{props.achieved ? props.time.toLocaleDateString(): ""}</p>
-            <p>{props.description}</p>
-            <Link className="w-1/8 h-1/8" to={{
-                pathname: '/detail',
-                state: {
-                    id: props.detailId,
-                }
-            }}>
-                <img className=" mx-auto "
-                     src={props.img_icon_url}
-                     alt={props.parent_app}/>
-            </Link>
         </div>
-</div>
+
 
     )
 }

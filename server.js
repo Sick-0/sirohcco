@@ -70,7 +70,7 @@ server.use(passport.initialize());
 server.use(passport.session());
 
 //comment for local development
-//server.use(express.static(path.join(__dirname, "build/")));
+server.use(express.static(path.join(__dirname, "build/")));
 
 //api home test
 server.get('/api/home', function (req, res) {
@@ -160,16 +160,16 @@ server.get('/auth/steam/return',
         res.redirect(process.env.HOMEPAGE);
     });
 
-/*//comment for local development
+//comment for local development
 server.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build/index.html'));
 });
 //comment for local development
 server.use((req, res) => {
     res.status(404).json({message: 'Route Not Found'});
-});*/
+});
 //change to 8080 for local dev for heroku call process.env.PORT
-server.listen(process.env.PORT || '8080');
+server.listen(process.env.PORT);
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If

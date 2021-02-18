@@ -101,9 +101,9 @@ function GameDetail(props) {
                             image={value.icon}
                             name={value.displayName}
                             description={value.description}
-                            checked={value.achieved}
+                            achieved={value.achieved}
                             date={value.unlocktime}
-                            percent={value.percent}/>
+                            percent={value.percent.toFixed(2)}/>
                     </div>
                 )
             })}

@@ -2,6 +2,14 @@ import React from 'react';
 
 function Achievement(props) {
 
+    var time = "";
+    if (props.achieved){
+        console.log(props.date);
+        time = new Date(props.date * 1000)
+    }
+
+
+
     return (
         <div className="bg-purple-300 w-100 m-2 rounded-2xl p-3 shadow-md md:text-sm hover:shadow-2xl text-black achievementCard overflow-auto">
 
@@ -11,9 +19,9 @@ function Achievement(props) {
             <h1 className="text-3xl p-1 mb-1">{props.name}</h1>
             <p>PERCENT = {props.percent}</p>
             <p className="text-sm p-1 mb-1">{props.description}</p>
-            <input type="checkbox" className="form-checkbox h-5 w-5 text-gray-600 text-lg" checked={props.checked}/>
+            <input type="checkbox" className="form-checkbox h-5 w-5 text-gray-600 text-lg" checked={props.achieved}/>
                 <span className="ml-2 text-gray-700">ACHIEVED</span>
-            <p>ACHIEVED ON {props.date}</p>
+            <p>ACHIEVED ON {props.achieved ? time.toLocaleDateString() : "NOOOOOOT!"}</p>
         </div>
     );
 }

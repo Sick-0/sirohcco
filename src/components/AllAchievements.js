@@ -28,7 +28,7 @@ function AllAchievements() {
     const [isAchievedFilter, setIsAchievedFilter] = useState(1);
 
     const [isClickedAchived, setIsClickedAchived] = useState(false);
-    const [rarityDirection, setRarityDirection] = useState("");
+    const [rarityDirection, setRarityDirection] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const [dateDirection, setDateDirection] = useState("");
 
@@ -183,51 +183,45 @@ function AllAchievements() {
             <h1>All Achievements</h1>
             <SearchBar handleOnChange={handleOnChange}>{searchTerm}</SearchBar>
 
-            <div className="my-2">Sort rarity {rarityDirection}</div>
+            <div className="flex justify-between items-center px-8 py-6">
+                <h2>Sort rarity</h2>
+                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
+                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
+                    <div
 
-            <div className="w-12 relative my-1 cursor-pointer">
-                <div className="h-8 w-12 bg-gray-300 rounded-full">
-                    <div onClick={sortRarity}
-                         className="mt-1 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4">
+                        className={rarityDirection === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
+                        onClick={sortRarity}>
                     </div>
                 </div>
+
+
+            </div>
+            <div className="flex justify-between items-center px-8 py-6">
+                <h2>Set achieved</h2>
+                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
+                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
+                    <div
+
+                        className={isClickedAchived === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
+                        onClick={achievedFilter}>
+                    </div>
+                </div>
+
+
             </div>
 
-            <div className="w-12 relative my-1 cursor-pointer">
-                <div className="h-8 w-12 bg-gray-300 rounded-full">
-                    <div
-                        className="mt-1 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4"></div>
-                </div>
-            </div>
-            <div className="w-8 py-1 relative my-1 cursor-pointer">
-                <div className="h-5 bg-gray-300 rounded-full">
-                    <div
-                        className="-ml-3 mt-p w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-4"></div>
-                </div>
-            </div>
-
-            <div className="w-12 relative my-1 cursor-pointer">
-                <div className="h-8 w-12 bg-purple-600 rounded-full">
-                    <div
-                        className="mt-1 -ml-6 w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-96"></div>
-                </div>
-            </div>
-            <div className="w-8 py-1 relative my-1 cursor-pointer">
-                <div className="h-5 bg-pink-600 rounded-full">
-                    <div
-                        className="-ml-3 mt-p w-6 h-6 absolute transition-all transform ease-linear duration-100 flex items-center justify-center rounded-full bg-white shadow-toggle border-gray-300 top-0 left-96"></div>
-                </div>
-            </div>
-
-            <button onClick={achievedFilter}>Set achieved is {isAchievedFilter}</button>
-            <Select options={selectOptions} isMulti onChange={gameFilter}/>
+            <Select className={"gameSelect"} options={selectOptions} isMulti onChange={gameFilter}/>
             <div className="grid grid-cols-3 gap-4">
                 {
+                    //moet naar functie
                     pagedData.length ? pagedData.map((value, index) => {
                         //hier?
                         var border = "";
+                        var progress = "";
                         var colorBackGround = "";
                         var textColor = "";
+                        var percentInvert = 100 - value.percent;
+                        var uitkomstPercent = 0;
 
                         if (value.achieved === 1) {
                             colorBackGround = "purple-300"
@@ -239,16 +233,47 @@ function AllAchievements() {
 
                         if (value.percent < 100 && value.percent >= 70) {
                             border = "gray-700";
+                            progress = "#374151"
+
+                            var res1 = 100 - 70;
+                            var res2 = res1 - (value.percent - 70);
+                            var res3 = res2 / res1;
+                            uitkomstPercent = res3 * 100;
+
                         } else if (value.percent < 70 && value.percent >= 40) {
                             border = "green-600"
+                            progress = "#059669"
+
+                            var res1 = 70 - 40;
+                            var res2 = res1 - (value.percent - 40);
+                            var res3 = res2 / res1;
+                            uitkomstPercent = res3 * 100;
+
                         } else if (value.percent < 40 && value.percent >= 10) {
                             border = "blue-500"
+                            progress = "#3B82F6"
+
+                            var res1 = 40 - 10;
+                            var res2 = res1 - (value.percent - 10);
+                            var res3 = res2 / res1;
+                            uitkomstPercent = res3 * 100;
                         } else if (value.percent < 10 && value.percent >= 1) {
                             border = "purple-500"
+                            progress = "#8B5CF6"
+
+                            var res1 = 10 - 1;
+                            var res2 = res1 - (value.percent - 1);
+                            var res3 = res2 / res1;
+                            uitkomstPercent = res3 * 100;
                         } else {
                             border = "yellow-500"
-                        }
+                            progress = "#D97706"
 
+                            var res1 = 1 - 0;
+                            var res2 = res1 - (value.percent - 0);
+                            var res3 = res2 / res1;
+                            uitkomstPercent = res3 * 100;
+                        }
 
                         var rounded = (value.percent).toFixed(2);
                         var time = new Date(value.unlocktime * 1000)
@@ -258,7 +283,9 @@ function AllAchievements() {
                                 <FlipBadge name={value.displayName}
                                            description={value.description}
                                            date={value.unlocktime}
-                                           percent={value.percent}
+                                    //hier aant cheaten
+                                           percent={uitkomstPercent}
+
                                            achieved={value.achieved}
                                            icon={value.achieved ? value.icon : value.icongray} border={border}
                                            colorBackGround={colorBackGround}
@@ -267,7 +294,9 @@ function AllAchievements() {
                                            detailId={value.appid}
                                            parent_app={value.gameName}
                                            rounded={rounded}
-                                           time={time}/>
+                                           time={time}
+                                           progress={progress}
+                                />
 
                             </div>
                         )
