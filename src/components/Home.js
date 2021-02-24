@@ -28,7 +28,7 @@ function Home() {
         <div>
             <h1>Home</h1>
             <p>{data}</p>
-
+            <p>Also I dont take any of your data! I just want to know who you are(some weird number) so I can get your achievements and games and show it to you in a nice way...</p>
         </div>
     );
 

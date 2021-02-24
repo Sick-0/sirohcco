@@ -2,7 +2,7 @@
   "name": "sirohcco",
   "version": "0.1.0",
   "private": true,
-  "homepge" : "https://sirohcco.herokuapp.com/",
+  "homepage": "https://sirohcco.herokuapp.com/",
   "dependencies": {
     "@craco/craco": "^6.1.0",
     "@tailwindcss/postcss7-compat": "^2.0.2",
@@ -14,6 +14,7 @@
     "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "filter-object-array": "^0.3.5",
     "nodemon": "^2.0.7",
     "passport": "^0.4.1",
     "passport-steam": "^1.0.15",

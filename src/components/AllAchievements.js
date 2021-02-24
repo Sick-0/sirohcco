@@ -6,17 +6,15 @@ import ReactPaginate from 'react-paginate';
 import Select from "react-select";
 
 // THANKS TO NIKITAAAAAAAAAH
-import {sortAscDesc} from "./helpers/sortAscDesc";
-import {isAchived} from "./helpers/isAchived";
-import {isAchivedSortAscDesc} from "./helpers/isAchivedSortAscDesc";
-import {searchFilter} from "./helpers/searchFilter";
-import {sortDateAscDesc} from "./helpers/sortDateAscDesc";
+import {filterAndSort} from "./helpers/filterAndSort";
+import {flipStyler} from "./helpers/flipStyler";
 
 function AllAchievements() {
     //TODO replace with REDUX or context
     const [data, setData] = useState([{}]);
     const [achievements, setAchievements] = useState([]);
     const [filteredAchievements, setFilteredAchievements] = useState([]);
+
     const [pageCount, setPageCount] = useState(10);
     const [offset, setOffset] = useState(99);
     const [pagedData, setPagedData] = useState([]);
@@ -24,87 +22,40 @@ function AllAchievements() {
     const [selectOptions, setSelectOptions] = useState([{}]);
     const [chosenGames, setChosenGames] = useState([]);
 
-    //TODO states for filters +
-    const [isAchievedFilter, setIsAchievedFilter] = useState(1);
-
-    const [isClickedAchived, setIsClickedAchived] = useState(false);
+    const [isAchievedFilter, setIsAchievedFilter] = useState(0);
     const [rarityDirection, setRarityDirection] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
-    const [dateDirection, setDateDirection] = useState("");
 
-    //siccos filter test
-    const [filterArr, setFilterArr] = [{achieved: true,}];
-
-
-    const getAchivements = (filtered) => {
-        setFilteredAchievements(filtered);
-        let pages = filtered.length / offset;
-        setPageCount(pages);
-        handlePageClick({selected: 0});
-    };
-
-    const theOne = () => {
-        sortAscDesc(rarityDirection, filteredAchievements, setFilteredAchievements);
-        isAchived(
-            isClickedAchived,
-            achievements,
-            setFilteredAchievements,
-            isAchievedFilter
-        );
-        isAchivedSortAscDesc(
-            isClickedAchived,
-            achievements,
-            setFilteredAchievements,
-            isAchievedFilter,
-            rarityDirection
-        );
-        searchFilter(
-            searchTerm,
-            filteredAchievements,
-            achievements,
-            isClickedAchived,
-            getAchivements
-        );
-    };
-
-    const handleOnChange = ({target: {value}}) => {
+    //searchterm typer
+    const handleSearchChange = ({target: {value}}) => {
         setSearchTerm(value);
     };
 
+    //rarity clicker
     const sortRarity = () => {
         setRarityDirection((prevCheck) => !prevCheck);
     };
 
+    //achieved clicker
     const achievedFilter = (e) => {
-        if (isClickedAchived) {
-            setIsClickedAchived(false);
+        if (isAchievedFilter === 1) {
+            setIsAchievedFilter(0);
         } else {
-            setIsClickedAchived(true);
+            setIsAchievedFilter(1);
         }
     };
 
+    //fill up the game id array for filter by game
     const gameFilter = (e) => {
         let tempArr = [];
-        console.log(e);
         e.forEach(game => {
             tempArr.push(game.value)
         })
-        console.log(tempArr);
         setChosenGames(tempArr);
     };
 
-    useEffect(() => {
-        console.log(chosenGames);
-        chosenGames.forEach(value => {
-            const tempArr = filteredAchievements.filter(function (a) {
-                return a.appid === value;
-            });
-            setFilteredAchievements(tempArr);
-        })
 
-    }, [chosenGames]);
-
-
+    //page changer for paged data
     const handlePageClick = (data) => {
         if (filteredAchievements.length !== 0) {
             let selected = data.selected;
@@ -113,10 +64,18 @@ function AllAchievements() {
         }
     };
 
-    useEffect(() => {
-        theOne();
-    }, [rarityDirection, isClickedAchived, searchTerm]);
 
+    //if a filter or sort changes apply all active needs update on on or off
+    useEffect(() => {
+        console.log(achievements);
+        const setFiltered = async () => {
+            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {rarity: rarityDirection}, chosenGames, searchTerm, achievements));
+        }
+        console.log(filteredAchievements);
+        setFiltered();
+    }, [rarityDirection, isAchievedFilter, chosenGames, searchTerm]);
+
+    //set up get da data
     useEffect(() => {
         const fetchData = async () => {
             const result = await axios.get("api/allachievements", {
@@ -134,6 +93,7 @@ function AllAchievements() {
         fetchData();
     }, []);
 
+    //organise into achievements
     useEffect(() => {
         if (data.length !== {}) {
             const orgAchievements = async () => {
@@ -160,12 +120,15 @@ function AllAchievements() {
         }
     }, [data]);
 
+    //calculate pages and set up
     useEffect(() => {
         let pages = filteredAchievements.length / offset;
         setPageCount(pages);
         handlePageClick({selected: 0});
-    }, [filteredAchievements, rarityDirection]);
+    }, [filteredAchievements]);
 
+
+    //set up of the select box
     useEffect(() => {
         let tempArr = [];
         achievements.forEach(achi => {
@@ -181,7 +144,7 @@ function AllAchievements() {
     return (
         <div>
             <h1>All Achievements</h1>
-            <SearchBar handleOnChange={handleOnChange}>{searchTerm}</SearchBar>
+            <SearchBar handleOnChange={handleSearchChange}>{searchTerm}</SearchBar>
 
             <div className="flex justify-between items-center px-8 py-6">
                 <h2>Sort rarity</h2>
@@ -202,7 +165,7 @@ function AllAchievements() {
                     {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
                     <div
 
-                        className={isClickedAchived === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
+                        className={isAchievedFilter === 0 ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
                         onClick={achievedFilter}>
                     </div>
                 </div>
@@ -213,70 +176,10 @@ function AllAchievements() {
             <Select className={"gameSelect"} options={selectOptions} isMulti onChange={gameFilter}/>
             <div className="grid grid-cols-3 gap-4">
                 {
-                    //moet naar functie
                     pagedData.length ? pagedData.map((value, index) => {
-                        //hier?
-                        var border = "";
-                        var progress = "";
-                        var colorBackGround = "";
-                        var textColor = "";
-                        var percentInvert = 100 - value.percent;
-                        var uitkomstPercent = 0;
 
-                        if (value.achieved === 1) {
-                            colorBackGround = "purple-300"
-                            textColor = "black"
-                        } else {
-                            colorBackGround = "gray-300"
-                            textColor = "black"
-                        }
-
-                        if (value.percent < 100 && value.percent >= 70) {
-                            border = "gray-700";
-                            progress = "#374151"
-
-                            var res1 = 100 - 70;
-                            var res2 = res1 - (value.percent - 70);
-                            var res3 = res2 / res1;
-                            uitkomstPercent = res3 * 100;
-
-                        } else if (value.percent < 70 && value.percent >= 40) {
-                            border = "green-600"
-                            progress = "#059669"
-
-                            var res1 = 70 - 40;
-                            var res2 = res1 - (value.percent - 40);
-                            var res3 = res2 / res1;
-                            uitkomstPercent = res3 * 100;
-
-                        } else if (value.percent < 40 && value.percent >= 10) {
-                            border = "blue-500"
-                            progress = "#3B82F6"
-
-                            var res1 = 40 - 10;
-                            var res2 = res1 - (value.percent - 10);
-                            var res3 = res2 / res1;
-                            uitkomstPercent = res3 * 100;
-                        } else if (value.percent < 10 && value.percent >= 1) {
-                            border = "purple-500"
-                            progress = "#8B5CF6"
-
-                            var res1 = 10 - 1;
-                            var res2 = res1 - (value.percent - 1);
-                            var res3 = res2 / res1;
-                            uitkomstPercent = res3 * 100;
-                        } else {
-                            border = "yellow-500"
-                            progress = "#D97706"
-
-                            var res1 = 1 - 0;
-                            var res2 = res1 - (value.percent - 0);
-                            var res3 = res2 / res1;
-                            uitkomstPercent = res3 * 100;
-                        }
-
-                        var rounded = (value.percent).toFixed(2);
-                        var time = new Date(value.unlocktime * 1000)
+                        //made a function to handle all of kayastyle
+                        let styleO = flipStyler(value.percent, value.achieved, value.unlocktime);
 
                         return (
                             <div key={index}>
@@ -284,24 +187,24 @@ function AllAchievements() {
                                            description={value.description}
                                            date={value.unlocktime}
                                     //hier aant cheaten
-                                           percent={uitkomstPercent}
+                                           percent={styleO.finalPercent}
 
                                            achieved={value.achieved}
-                                           icon={value.achieved ? value.icon : value.icongray} border={border}
-                                           colorBackGround={colorBackGround}
-                                           textColor={textColor}
+                                           icon={value.achieved ? value.icon : value.icongray} border={styleO.border}
+                                           colorBackGround={styleO.colorBackGround}
+                                           textColor={styleO.textColor}
                                            img_icon_url={value.img_icon_url}
                                            detailId={value.appid}
                                            parent_app={value.gameName}
-                                           rounded={rounded}
-                                           time={time}
-                                           progress={progress}
+                                           rounded={styleO.rounded}
+                                           time={styleO.time}
+                                           progress={styleO.progress}
                                 />
 
                             </div>
                         )
 
-                    }) : <p>LOADING LOADING LOADING</p>
+                    }) : <p>LOADING: please wait and check if your steam data is public ;)</p>
                 }
             </div>
             <ReactPaginate
