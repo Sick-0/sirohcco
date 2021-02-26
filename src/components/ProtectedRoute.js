@@ -13,7 +13,6 @@ class ProtectedRoute extends Component {
     }
 
     componentDidMount() {
-       console.log("PROTECTED TIME")
        axios.get(
            'api/check',
            {
@@ -25,7 +24,6 @@ class ProtectedRoute extends Component {
        )
            .then(res => {
                if (res.status === 200) {
-                   console.log("ALL GOOD")
                    this.setState({ loading: false });
                } else {
                    throw new Error(res.error);

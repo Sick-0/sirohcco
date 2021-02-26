@@ -103,13 +103,29 @@ server.get('/api/check', function (req, res) {
 server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
     console.log('allgames ROUTE hit');
     let allG = await allGames(req.user.id);
-    res.send(allG.data.response.games);
+    if (allG.data.response.games.length) {
+
+        console.log(allG.data.response.games.length);
+        res.send(allG.data.response.games);
+    } else {
+        console.log(allG);
+        console.log('ERROR TIME');
+        res.status(500).send("500 SOMETHING WENT WRONG");
+    }
 })
 
 server.get('/api/allachievements', ensureAuthenticated, async function (req, res) {
     console.log('all achievements ROUTE hit');
     let allA = await getAllAchievements(req.user.id);
-    res.send(allA);
+    //if nothing return clean error should handle 3 cases -> no games, no achievements, no access
+    if (allA.length) {
+        console.log(allA);
+        res.send(allA);
+    } else {
+        console.log(allA);
+        console.log('ERROR TIME');
+        res.status(500).send("500 SOMETHING WENT WRONG");
+    }
 })
 
 //get game detail
@@ -135,7 +151,7 @@ server.get('/api/percentage/', ensureAuthenticated, async function (req, res) {
 //logout route
 server.get('/logout', function (req, res) {
     req.logout();
-    res.redirect( process.env.HOMEPAGE);
+    res.redirect(process.env.HOMEPAGE);
 });
 
 // GET /auth/steam

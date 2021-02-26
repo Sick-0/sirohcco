@@ -4,6 +4,7 @@ import FlipBadge from "./FlipBadge";
 import SearchBar from "./SearchBar";
 import ReactPaginate from 'react-paginate';
 import Select from "react-select";
+import Loader from "react-loader-spinner";
 
 // THANKS TO NIKITAAAAAAAAAH
 import {filterAndSort} from "./helpers/filterAndSort";
@@ -24,7 +25,11 @@ function AllAchievements() {
 
     const [isAchievedFilter, setIsAchievedFilter] = useState(0);
     const [rarityDirection, setRarityDirection] = useState(false);
+    const [dateDirection, setDateDirection] = useState(true);
+    const [lastClicked, setLastClicked] = useState("date");
     const [searchTerm, setSearchTerm] = useState("");
+
+    const [error, setError] = useState('');
 
     //searchterm typer
     const handleSearchChange = ({target: {value}}) => {
@@ -34,6 +39,13 @@ function AllAchievements() {
     //rarity clicker
     const sortRarity = () => {
         setRarityDirection((prevCheck) => !prevCheck);
+        setLastClicked("rarity");
+    };
+
+    //date clicker
+    const sortDate = () => {
+        setDateDirection((prevCheck) => !prevCheck);
+        setLastClicked("date");
     };
 
     //achieved clicker
@@ -67,13 +79,20 @@ function AllAchievements() {
 
     //if a filter or sort changes apply all active needs update on on or off
     useEffect(() => {
-        console.log(achievements);
         const setFiltered = async () => {
-            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {rarity: rarityDirection}, chosenGames, searchTerm, achievements));
+            let direction = false;
+
+            if (lastClicked === "date") {
+                direction = dateDirection
+                setIsAchievedFilter(1)
+            }
+            else if (lastClicked === "rarity") {
+                direction = rarityDirection
+            }
+            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {sort: lastClicked, direction: direction}, chosenGames, searchTerm, achievements));
         }
-        console.log(filteredAchievements);
         setFiltered();
-    }, [rarityDirection, isAchievedFilter, chosenGames, searchTerm]);
+    }, [rarityDirection, dateDirection, isAchievedFilter, chosenGames, searchTerm, achievements]);
 
     //set up get da data
     useEffect(() => {
@@ -83,11 +102,15 @@ function AllAchievements() {
                     port: 8080,
                 },
                 credentials: "include",
-            });
-            if (result.data) {
+            }).catch(error => {
+                    console.log(error);
+                setError(error.response.data);
+                }
+            );
+
+            if (result) {
                 setData(result.data);
             }
-            console.log(result.data);
         };
 
         fetchData();
@@ -115,8 +138,6 @@ function AllAchievements() {
             };
 
             orgAchievements();
-        } else {
-            console.log("EMPTY OBJECT");
         }
     }, [data]);
 
@@ -147,7 +168,7 @@ function AllAchievements() {
             <SearchBar handleOnChange={handleSearchChange}>{searchTerm}</SearchBar>
 
             <div className="flex justify-between items-center px-8 py-6">
-                <h2>Sort rarity</h2>
+                {lastClicked === "rarity" ? <h2>Sorting by rarity</h2> : <h2>Sort by rarity</h2>}
                 <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
                     {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
                     <div
@@ -159,6 +180,21 @@ function AllAchievements() {
 
 
             </div>
+
+            <div className="flex justify-between items-center px-8 py-6">
+                {lastClicked === "date" ? <h2>Sorting by date achieved</h2> : <h2>Sort by date achieved</h2>}
+                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
+                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
+                    <div
+
+                        className={dateDirection === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
+                        onClick={sortDate}>
+                    </div>
+                </div>
+
+
+            </div>
+
             <div className="flex justify-between items-center px-8 py-6">
                 <h2>Set achieved</h2>
                 <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
@@ -174,41 +210,44 @@ function AllAchievements() {
             </div>
 
             <Select className={"gameSelect"} options={selectOptions} isMulti onChange={gameFilter}/>
-            <div className="grid grid-cols-3 gap-4">
-                {
-                    pagedData.length ? pagedData.map((value, index) => {
 
-                        //made a function to handle all of kayastyle
-                        let styleO = flipStyler(value.percent, value.achieved, value.unlocktime);
+            {
+                pagedData.length ? <div className="grid grid-cols-3 gap-4 mx-auto"> {pagedData.map((value, index) => {
 
-                        return (
-                            <div key={index}>
-                                <FlipBadge name={value.displayName}
-                                           description={value.description}
-                                           date={value.unlocktime}
-                                    //hier aant cheaten
-                                           percent={styleO.finalPercent}
+                    //made a function to handle all of kayastyle
+                    let styleO = flipStyler(value.percent, value.achieved, value.unlocktime);
 
-                                           achieved={value.achieved}
-                                           icon={value.achieved ? value.icon : value.icongray} border={styleO.border}
-                                           colorBackGround={styleO.colorBackGround}
-                                           textColor={styleO.textColor}
-                                           img_icon_url={value.img_icon_url}
-                                           detailId={value.appid}
-                                           parent_app={value.gameName}
-                                           rounded={styleO.rounded}
-                                           time={styleO.time}
-                                           progress={styleO.progress}
-                                />
+                    return (
+                        <div key={index}>
+                            <FlipBadge name={value.displayName}
+                                       description={value.description}
+                                       date={value.unlocktime}
 
-                            </div>
-                        )
+                                       percent={styleO.finalPercent}
 
-                    }) : <p>LOADING: please wait and check if your steam data is public ;)</p>
-                }
-            </div>
+                                       achieved={value.achieved}
+                                       icon={value.achieved ? value.icon : value.icongray} border={styleO.border}
+                                       colorBackGround={styleO.colorBackGround}
+                                       textColor={styleO.textColor}
+                                       img_icon_url={value.img_icon_url}
+                                       detailId={value.appid}
+                                       parent_app={value.gameName}
+                                       rounded={styleO.rounded}
+                                       time={styleO.time}
+                                       progress={styleO.progress}
+                                       iconAchieved={styleO.iconAchieved}
+                            />
+
+                        </div>
+                    )
+
+                })} </div> : error !== '' ? <p>there is an error called {error}</p> : <div className={" mx-auto items-center px-8 py-6"}><h2>Loading: please hold...</h2> <Loader
+                    className={"mx-auto items-center"} type="Hearts" color="#DC143C" height={150} width={150}
+                    margin={'auto'}/> <p>PS: make sure your data is public</p></div>
+            }
+
             <ReactPaginate
-                previousLabel={'previous'}
+                previousLabel={'prev'}
                 nextLabel={'next'}
                 breakLabel={'...'}
                 breakClassName={'break-me'}

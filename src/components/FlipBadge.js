@@ -36,17 +36,17 @@ function FlipBadge(props) {
                 <div className="text-center pb-2">
                     <br/>
                     <Progress
+                        //test -hier voor symbols
                         theme={{
                             default: {
-                                symbol: props.achieved ? '🌟' : ' ',
+                                symbol: props.achieved ? <img
+                                    src={props.iconAchieved}/> : ' ',
                                 color: props.progress,
                                 trailColor: '#EFEFEF',
                             }
                         }
                         }
                         type="circle"
-                        //upper en lower value percentage ex: 0% -> 1%
-                        //if 0% -> 100%
                         percent={props.percent}
                         status="default"
                     />

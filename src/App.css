@@ -90,3 +90,19 @@
 .gameSelect{
   color: black;
 }
+
+.pagination  {
+  min-width: 696px;
+  list-style: none;
+  padding-top: 20px;
+}
+
+.pagination li {
+  display: inline-block;
+  margin: auto;
+  padding: 5px;
+}
+
+svg:first-child{
+margin: auto;
+}
