@@ -2,7 +2,7 @@
   "name": "sirohcco",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://sirohcco.herokuapp.com/",
+  "proxy": "http://localhost:8080/",
   "dependencies": {
     "@craco/craco": "^6.1.0",
     "@tailwindcss/postcss7-compat": "^2.0.2",
@@ -31,7 +31,7 @@
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "node server",
+    "start": "craco start",
     "server": "nodemon server.js",
     "build": "craco build",
     "test": "craco test",

@@ -22,12 +22,14 @@ function AllAchievements() {
 
     const [selectOptions, setSelectOptions] = useState([{}]);
     const [chosenGames, setChosenGames] = useState([]);
-
     const [isAchievedFilter, setIsAchievedFilter] = useState(0);
     const [rarityDirection, setRarityDirection] = useState(false);
     const [dateDirection, setDateDirection] = useState(true);
-    const [lastClicked, setLastClicked] = useState("date");
+
     const [searchTerm, setSearchTerm] = useState("");
+
+    const [lastClicked, setLastClicked] = useState("date");
+    const [activeFilters, setActiveFilters] = useState({isRaritySort: false, isDateSort: false, isAchievedFilter: false, isGameNameFilter: false, isAchievementNameFilter: false});
 
     const [error, setError] = useState('');
 
@@ -36,19 +38,47 @@ function AllAchievements() {
         setSearchTerm(value);
     };
 
-    //rarity clicker
+    //rarity direction clicker
     const sortRarity = () => {
         setRarityDirection((prevCheck) => !prevCheck);
         setLastClicked("rarity");
     };
 
-    //date clicker
+    //date direction clicker
     const sortDate = () => {
         setDateDirection((prevCheck) => !prevCheck);
         setLastClicked("date");
     };
 
-    //achieved clicker
+    //active filter changer (checkbox to enable and disable certain sorts and filters
+    const setFilters = (e) => {
+        let curFilters = activeFilters;
+        if (e.target.id === "rarityCheckBox") {
+            if (activeFilters.isRaritySort) {
+                curFilters.isRaritySort = false;
+            }
+            else {
+                curFilters.isRaritySort = true;
+                curFilters.isDateSort = false;
+            }
+        }
+        else if (e.target.id === "dateCheckBox") {
+            if (activeFilters.isDateSort) {
+                curFilters.isDateSort = false;
+            }
+            else {
+                curFilters.isDateSort = true;
+                curFilters.isRaritySort = false;
+            }
+        }
+        else if (e.target.id === "achievedCheckBox") {
+            curFilters.isAchievedFilter = !activeFilters.isAchievedFilter;
+        }
+        setActiveFilters(curFilters);
+        console.log(e.target.id);
+    }
+
+    //achieved direction clicker
     const achievedFilter = (e) => {
         if (isAchievedFilter === 1) {
             setIsAchievedFilter(0);
@@ -89,7 +119,7 @@ function AllAchievements() {
             else if (lastClicked === "rarity") {
                 direction = rarityDirection
             }
-            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {sort: lastClicked, direction: direction}, chosenGames, searchTerm, achievements));
+            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {sort: lastClicked, direction: direction}, chosenGames, searchTerm, achievements, activeFilters));
         }
         setFiltered();
     }, [rarityDirection, dateDirection, isAchievedFilter, chosenGames, searchTerm, achievements]);
@@ -126,7 +156,7 @@ function AllAchievements() {
                     if (object.achievements) {
                         object.achievements.forEach(function (achi, index) {
                             let tempObj = achi;
-                            tempObj.img_icon_url = "http://media.steampowered.com/steamcommunity/public/images/apps/" + object.appid + "/" + object.img_icon_url + ".jpg";
+                            tempObj.img_icon_url = "https://media.steampowered.com/steamcommunity/public/images/apps/" + object.appid + "/" + object.img_icon_url + ".jpg";
                             tempObj.gameName = object.name;
                             tempObj.appid = object.appid;
                             tempArr.push(tempObj);
@@ -149,16 +179,27 @@ function AllAchievements() {
     }, [filteredAchievements]);
 
 
+    //TODO: select box for rarity
+    //TODO: neutral state for sort and filters
+    //TODO: checkbox for filters & sorts?
+
+
     //set up of the select box
     useEffect(() => {
         let tempArr = [];
+
         achievements.forEach(achi => {
             if (!tempArr.some(e => e.value === achi.appid)) {
                 tempArr.push({value: achi.appid, label: achi.gameName})
             }
         })
+        let sortedNewArr = tempArr.sort(function (a,b) {
+            var textA = a.label.toUpperCase();
+            var textB = b.label.toUpperCase();
+            return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
+        });
 
-        setSelectOptions(tempArr);
+        setSelectOptions(sortedNewArr);
 
     }, [achievements])
 
@@ -168,6 +209,7 @@ function AllAchievements() {
             <SearchBar handleOnChange={handleSearchChange}>{searchTerm}</SearchBar>
 
             <div className="flex justify-between items-center px-8 py-6">
+                <input type="checkbox" id="rarityCheckBox" value="Rarity" checked={activeFilters.isRaritySort} onClick={setFilters} />
                 {lastClicked === "rarity" ? <h2>Sorting by rarity</h2> : <h2>Sort by rarity</h2>}
                 <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
                     {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
@@ -182,6 +224,7 @@ function AllAchievements() {
             </div>
 
             <div className="flex justify-between items-center px-8 py-6">
+                <input type="checkbox" id="dateCheckBox" value="Date" checked={activeFilters.isDateSort} onClick={setFilters} />
                 {lastClicked === "date" ? <h2>Sorting by date achieved</h2> : <h2>Sort by date achieved</h2>}
                 <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
                     {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
@@ -196,6 +239,7 @@ function AllAchievements() {
             </div>
 
             <div className="flex justify-between items-center px-8 py-6">
+            <input type="checkbox" id="achievedCheckBox" value="Achieved" checked={activeFilters.isAchievedFilter} onClick={setFilters} />
                 <h2>Set achieved</h2>
                 <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
                     {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}

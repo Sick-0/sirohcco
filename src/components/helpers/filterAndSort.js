@@ -5,7 +5,8 @@ export const filterAndSort = async (
     sorts = {},
     games = [],
     searchTerm = '',
-    originalArr = []
+    originalArr = [],
+    activeFilters = {}
 ) => {
 
 
@@ -52,7 +53,7 @@ export const filterAndSort = async (
 
 
     if (sorts) {
-        if (sorts.sort === "rarity") {
+        if (activeFilters.rarity) {
             if (sorts.direction) {
                 sortedNewArr = afterSearchArr.sort(function (a, b) {
                     return a.percent - b.percent;
@@ -64,7 +65,7 @@ export const filterAndSort = async (
                 });
                 returnArr = sortedNewArr
             }
-        } else if (sorts.sort === "date") {
+        } else if (activeFilters.date) {
             if (sorts.direction) {
                 sortedNewArr = afterSearchArr.sort(function (a, b) {
                     return b.unlocktime - a.unlocktime;

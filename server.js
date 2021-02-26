@@ -70,7 +70,7 @@ server.use(passport.initialize());
 server.use(passport.session());
 
 //comment for local development
-server.use(express.static(path.join(__dirname, "build/")));
+/*server.use(express.static(path.join(__dirname, "build/")));*/
 
 //api home test
 server.get('/api/home', function (req, res) {
@@ -103,13 +103,13 @@ server.get('/api/check', function (req, res) {
 server.get('/api/allgames', ensureAuthenticated, async function (req, res) {
     console.log('allgames ROUTE hit');
     let allG = await allGames(req.user.id);
+    //if nothing return clean error should handle 3 cases -> no games, no achievements, no access
     if (allG.data.response.games.length) {
 
-        console.log(allG.data.response.games.length);
+        console.log(allG.data.response);
         res.send(allG.data.response.games);
     } else {
-        console.log(allG);
-        console.log('ERROR TIME');
+
         res.status(500).send("500 SOMETHING WENT WRONG");
     }
 })
@@ -119,11 +119,8 @@ server.get('/api/allachievements', ensureAuthenticated, async function (req, res
     let allA = await getAllAchievements(req.user.id);
     //if nothing return clean error should handle 3 cases -> no games, no achievements, no access
     if (allA.length) {
-        console.log(allA);
         res.send(allA);
     } else {
-        console.log(allA);
-        console.log('ERROR TIME');
         res.status(500).send("500 SOMETHING WENT WRONG");
     }
 })
@@ -176,16 +173,16 @@ server.get('/auth/steam/return',
         res.redirect(process.env.HOMEPAGE);
     });
 
-//comment for local development
+/*//comment for local development
 server.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'build/index.html'));
 });
 //comment for local development
 server.use((req, res) => {
     res.status(404).json({message: 'Route Not Found'});
-});
+});*/
 //change to 8080 for local dev for heroku call process.env.PORT
-server.listen(process.env.PORT);
+server.listen(process.env.PORT || '8080');
 
 // Simple route middleware to ensure user is authenticated.
 //   Use this route middleware on any resource that needs to be protected.  If
