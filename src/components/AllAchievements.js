@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useReducer, useState} from 'react';
 import axios from "axios";
 import FlipBadge from "./FlipBadge";
 import SearchBar from "./SearchBar";
@@ -9,6 +9,8 @@ import Loader from "react-loader-spinner";
 // THANKS TO NIKITAAAAAAAAAH
 import {filterAndSort} from "./helpers/filterAndSort";
 import {flipStyler} from "./helpers/flipStyler";
+import FilterSortComponent from "./FilterSortComponent";
+
 
 function AllAchievements() {
     //TODO replace with REDUX or context
@@ -21,70 +23,92 @@ function AllAchievements() {
     const [pagedData, setPagedData] = useState([]);
 
     const [selectOptions, setSelectOptions] = useState([{}]);
-    const [chosenGames, setChosenGames] = useState([]);
-    const [isAchievedFilter, setIsAchievedFilter] = useState(0);
-    const [rarityDirection, setRarityDirection] = useState(false);
-    const [dateDirection, setDateDirection] = useState(true);
 
+    const [chosenGames, setChosenGames] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
 
-    const [lastClicked, setLastClicked] = useState("date");
-    const [activeFilters, setActiveFilters] = useState({isRaritySort: false, isDateSort: false, isAchievedFilter: false, isGameNameFilter: false, isAchievementNameFilter: false});
+    const [activeFilters, setActiveFilters] = useState({
+        isRaritySort: false,
+        isDateSort: false,
+        isAchievedFilter: false,
+        isGameNameFilter: false,
+        isAchievementNameFilter: false
+    });
+    const [sortDirections, setSortDirections] = useState({rarityDirection: false, dateDirection: false});
+    const [filterValues, setFilterValues] = useState({isAchieved: 0, chosenGames: [], searchTerm: ''})
 
     const [error, setError] = useState('');
 
     //searchterm typer
     const handleSearchChange = ({target: {value}}) => {
-        setSearchTerm(value);
+
+        let stringFil = JSON.stringify(filterValues);
+        let curFilters = JSON.parse(stringFil);
+
+        curFilters.searchTerm = value;
+        setFilterValues(curFilters);
     };
 
     //rarity direction clicker
     const sortRarity = () => {
-        setRarityDirection((prevCheck) => !prevCheck);
-        setLastClicked("rarity");
+        let stringDir = JSON.stringify(sortDirections)
+        let curDirections = JSON.parse(stringDir);
+
+        curDirections.rarityDirection = !curDirections.rarityDirection;
+        setSortDirections(curDirections);
     };
 
     //date direction clicker
     const sortDate = () => {
-        setDateDirection((prevCheck) => !prevCheck);
-        setLastClicked("date");
+        let stringDir = JSON.stringify(sortDirections)
+        let curDirections = JSON.parse(stringDir);
+
+        curDirections.dateDirection = !curDirections.dateDirection;
+        setSortDirections(curDirections);
     };
 
     //active filter changer (checkbox to enable and disable certain sorts and filters
-    const setFilters = (e) => {
-        let curFilters = activeFilters;
-        if (e.target.id === "rarityCheckBox") {
+    const setFilters = async (e) => {
+        let stringFil = JSON.stringify(activeFilters);
+        let curFilters = JSON.parse(stringFil);
+        if (e.target.id === "Rarity") {
             if (activeFilters.isRaritySort) {
                 curFilters.isRaritySort = false;
-            }
-            else {
+            } else {
                 curFilters.isRaritySort = true;
                 curFilters.isDateSort = false;
             }
-        }
-        else if (e.target.id === "dateCheckBox") {
+        } else if (e.target.id === "Date") {
             if (activeFilters.isDateSort) {
                 curFilters.isDateSort = false;
-            }
-            else {
+            } else {
+
+                let stringVal = JSON.stringify(filterValues);
+                let curVals = JSON.parse(stringVal);
+                curVals.isAchieved = 1;
+
                 curFilters.isDateSort = true;
+                curFilters.isAchievedFilter = true;
                 curFilters.isRaritySort = false;
+
+                setFilterValues(curVals);
             }
-        }
-        else if (e.target.id === "achievedCheckBox") {
+        } else if (e.target.id === "Achieved") {
             curFilters.isAchievedFilter = !activeFilters.isAchievedFilter;
         }
         setActiveFilters(curFilters);
-        console.log(e.target.id);
     }
 
     //achieved direction clicker
-    const achievedFilter = (e) => {
-        if (isAchievedFilter === 1) {
-            setIsAchievedFilter(0);
+    const achievedFilter = async (e) => {
+        let stringFil = JSON.stringify(filterValues);
+        let curFilters = JSON.parse(stringFil);
+        if (curFilters.isAchieved === 1) {
+            curFilters.isAchieved = 0;
         } else {
-            setIsAchievedFilter(1);
+            curFilters.isAchieved = 1;
         }
+        setFilterValues(curFilters);
     };
 
     //fill up the game id array for filter by game
@@ -94,6 +118,7 @@ function AllAchievements() {
             tempArr.push(game.value)
         })
         setChosenGames(tempArr);
+
     };
 
 
@@ -108,21 +133,18 @@ function AllAchievements() {
 
 
     //if a filter or sort changes apply all active needs update on on or off
-    useEffect(() => {
-        const setFiltered = async () => {
-            let direction = false;
 
-            if (lastClicked === "date") {
-                direction = dateDirection
-                setIsAchievedFilter(1)
+    useEffect (() => {
+            console.log("i is triggered")
+            const doTheDance = async () => {
+                setFilteredAchievements([...await filterAndSort(chosenGames, achievements, activeFilters, sortDirections, filterValues)]);
             }
-            else if (lastClicked === "rarity") {
-                direction = rarityDirection
-            }
-            setFilteredAchievements(await filterAndSort({achieved: isAchievedFilter}, {sort: lastClicked, direction: direction}, chosenGames, searchTerm, achievements, activeFilters));
-        }
-        setFiltered();
-    }, [rarityDirection, dateDirection, isAchievedFilter, chosenGames, searchTerm, achievements]);
+            doTheDance();
+        },[activeFilters, sortDirections, filterValues, chosenGames, achievements]
+    )
+
+
+
 
     //set up get da data
     useEffect(() => {
@@ -134,7 +156,7 @@ function AllAchievements() {
                 credentials: "include",
             }).catch(error => {
                     console.log(error);
-                setError(error.response.data);
+                    setError(error.response.data);
                 }
             );
 
@@ -146,7 +168,7 @@ function AllAchievements() {
         fetchData();
     }, []);
 
-    //organise into achievements
+//organise into achievements
     useEffect(() => {
         if (data.length !== {}) {
             const orgAchievements = async () => {
@@ -164,14 +186,14 @@ function AllAchievements() {
                     }
                 });
                 setAchievements(tempArr);
-                setFilteredAchievements(tempArr);
+                setFilteredAchievements([...tempArr]);
             };
 
             orgAchievements();
         }
     }, [data]);
 
-    //calculate pages and set up
+//calculate pages and set up
     useEffect(() => {
         let pages = filteredAchievements.length / offset;
         setPageCount(pages);
@@ -179,12 +201,12 @@ function AllAchievements() {
     }, [filteredAchievements]);
 
 
-    //TODO: select box for rarity
-    //TODO: neutral state for sort and filters
-    //TODO: checkbox for filters & sorts?
+//TODO: select box for rarity
+//TODO: neutral state for sort and filters
+//TODO: checkbox for filters & sorts?
 
 
-    //set up of the select box
+//set up of the select box
     useEffect(() => {
         let tempArr = [];
 
@@ -193,7 +215,7 @@ function AllAchievements() {
                 tempArr.push({value: achi.appid, label: achi.gameName})
             }
         })
-        let sortedNewArr = tempArr.sort(function (a,b) {
+        let sortedNewArr = tempArr.sort(function (a, b) {
             var textA = a.label.toUpperCase();
             var textB = b.label.toUpperCase();
             return (textA < textB) ? -1 : (textA > textB) ? 1 : 0;
@@ -206,55 +228,31 @@ function AllAchievements() {
     return (
         <div>
             <h1>All Achievements</h1>
+            <br />
+
+            <h2>SORTING</h2>
+            <br />
+            <FilterSortComponent isActive={activeFilters.isRaritySort} callbackActive={setFilters}
+                                 callbackDirection={sortRarity} direction={sortDirections.rarityDirection}
+                                 type={"Rarity"}/>
+
+            <FilterSortComponent isActive={activeFilters.isDateSort} callbackActive={setFilters}
+                                 callbackDirection={sortDate} direction={sortDirections.dateDirection}
+                                 type={"Date"}/>
+
+            <h2>FILTERING</h2>
+            <br />
             <SearchBar handleOnChange={handleSearchChange}>{searchTerm}</SearchBar>
 
-            <div className="flex justify-between items-center px-8 py-6">
-                <input type="checkbox" id="rarityCheckBox" value="Rarity" checked={activeFilters.isRaritySort} onClick={setFilters} />
-                {lastClicked === "rarity" ? <h2>Sorting by rarity</h2> : <h2>Sort by rarity</h2>}
-                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
-                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
-                    <div
+            <FilterSortComponent isActive={activeFilters.isAchievedFilter} callbackActive={setFilters}
+                                 callbackDirection={achievedFilter} direction={filterValues.isAchieved}
+                                 type={"Achieved"}/>
 
-                        className={rarityDirection === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
-                        onClick={sortRarity}>
-                    </div>
-                </div>
-
-
-            </div>
-
-            <div className="flex justify-between items-center px-8 py-6">
-                <input type="checkbox" id="dateCheckBox" value="Date" checked={activeFilters.isDateSort} onClick={setFilters} />
-                {lastClicked === "date" ? <h2>Sorting by date achieved</h2> : <h2>Sort by date achieved</h2>}
-                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
-                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
-                    <div
-
-                        className={dateDirection === false ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
-                        onClick={sortDate}>
-                    </div>
-                </div>
-
-
-            </div>
-
-            <div className="flex justify-between items-center px-8 py-6">
-            <input type="checkbox" id="achievedCheckBox" value="Achieved" checked={activeFilters.isAchievedFilter} onClick={setFilters} />
-                <h2>Set achieved</h2>
-                <div className="w-16 h-10 bg-gray-300 rounded-full flex-shrink-0 p-1 transform -translate-x-6">
-                    {/* Trying to make it a point that if it's clicked to move the ball to X-6*/}
-                    <div
-
-                        className={isAchievedFilter === 0 ? "bg-white w-8 h-8 rounded-full shadow-md  transform  ease-linear duration-100   " : "bg-blue-500 w-8 h-8 rounded-full shadow-md transform  ease-linear duration-100 translate-x-6 "}
-                        onClick={achievedFilter}>
-                    </div>
-                </div>
-
-
-            </div>
 
             <Select className={"gameSelect"} options={selectOptions} isMulti onChange={gameFilter}/>
-
+            <br />
+            <h2>RESULT</h2>
+            <br />
             {
                 pagedData.length ? <div className="grid grid-cols-3 gap-4 mx-auto"> {pagedData.map((value, index) => {
 
@@ -285,9 +283,10 @@ function AllAchievements() {
                         </div>
                     )
 
-                })} </div> : error !== '' ? <p>there is an error called {error}</p> : <div className={" mx-auto items-center px-8 py-6"}><h2>Loading: please hold...</h2> <Loader
-                    className={"mx-auto items-center"} type="Hearts" color="#DC143C" height={150} width={150}
-                    margin={'auto'}/> <p>PS: make sure your data is public</p></div>
+                })} </div> : error !== '' ? <p>there is an error called {error}</p> :
+                    <div className={" mx-auto items-center px-8 py-6"}><h2>Loading: please hold...</h2> <Loader
+                        className={"mx-auto items-center"} type="Hearts" color="#DC143C" height={150} width={150}
+                        margin={'auto'}/> <p>PS: make sure your data is public</p></div>
             }
 
             <ReactPaginate

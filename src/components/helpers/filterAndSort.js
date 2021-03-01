@@ -1,14 +1,15 @@
 const filterObjectArray = require('filter-object-array');
 
 export const filterAndSort = async (
-    filters = {},
-    sorts = {},
     games = [],
-    searchTerm = '',
     originalArr = [],
-    activeFilters = {}
+    activeFilters = {},
+    sortDirections = {},
+    filterValues = {}
 ) => {
 
+    console.log("ACTIVE FILTERS")
+    console.log(activeFilters);
 
     //filters should look like { property: value, property2: value2, ... }
     //first check if filters -> apply to original array each of them
@@ -29,16 +30,22 @@ export const filterAndSort = async (
 
     let returnArr = afterGameFilterArr;
     let afterFilterArr = [];
-    if (filters) {
-        afterFilterArr = await filterObjectArray({array: afterGameFilterArr, objFilter: filters})
+    //rarity select gaat hier bij komen
+    if (activeFilters.isAchievedFilter) {
+        let filter = {achieved: filterValues.isAchieved};
+        afterFilterArr = await filterObjectArray({array: afterGameFilterArr, objFilter: filter})
         returnArr = afterFilterArr;
 
     }
+    else {
+        afterFilterArr = returnArr;
+    }
 
     let afterSearchArr = [];
-    if (searchTerm !== '') {
+    if (filterValues.searchTerm !== '') {
+        console.log("searching " + filterValues.searchTerm);
         afterSearchArr = afterFilterArr.filter((a) => {
-            return a.displayName.toLowerCase().includes(searchTerm.toLowerCase());
+            return a.displayName.toLowerCase().includes(filterValues.searchTerm.toLowerCase());
         });
         returnArr = afterSearchArr;
     } else {
@@ -52,34 +59,36 @@ export const filterAndSort = async (
     let sortedNewArr = [];
 
 
-    if (sorts) {
-        if (activeFilters.rarity) {
-            if (sorts.direction) {
-                sortedNewArr = afterSearchArr.sort(function (a, b) {
-                    return a.percent - b.percent;
-                });
-                returnArr = sortedNewArr
-            } else {
-                sortedNewArr = afterSearchArr.sort(function (a, b) {
-                    return b.percent - a.percent;
-                });
-                returnArr = sortedNewArr
-            }
-        } else if (activeFilters.date) {
-            if (sorts.direction) {
-                sortedNewArr = afterSearchArr.sort(function (a, b) {
-                    return b.unlocktime - a.unlocktime;
-                });
-                returnArr = sortedNewArr
-            } else {
-                sortedNewArr = afterSearchArr.sort(function (a, b) {
-                    return a.unlocktime - b.unlocktime;
-                });
-                returnArr = sortedNewArr
-            }
+    if (activeFilters.isRaritySort) {
+        console.log("gonna do rarity sort");
+        if (sortDirections.rarityDirection) {
+            sortedNewArr = afterSearchArr.sort(function (a, b) {
+                return a.percent - b.percent;
+            });
+            returnArr = sortedNewArr
+        } else {
+            sortedNewArr = afterSearchArr.sort(function (a, b) {
+                return b.percent - a.percent;
+            });
+            returnArr = sortedNewArr
+        }
+    } else if (activeFilters.isDateSort) {
+        if (sortDirections.dateDirection) {
+            sortedNewArr = afterSearchArr.sort(function (a, b) {
+                return b.unlocktime - a.unlocktime;
+            });
+            returnArr = sortedNewArr
+        } else {
+            sortedNewArr = afterSearchArr.sort(function (a, b) {
+                return a.unlocktime - b.unlocktime;
+            });
+            returnArr = sortedNewArr
         }
     }
+
 //return value should be new achievement array filtered and sorted
+    console.log("all done")
+    console.log(returnArr);
     return returnArr;
 }
 
